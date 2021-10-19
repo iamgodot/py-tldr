@@ -3,3 +3,6 @@
 --extra-index-url https://mirrors.cloud.tencent.com/pypi/simple/
 
 click==8.0.3
+toml==0.10.2
+requests==2.26.0
+rich==10.12.0

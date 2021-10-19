@@ -13,7 +13,7 @@ EMAIL = 'xugodot@gmail.com'
 AUTHOR = 'iamgodot'
 REQUIRES_PYTHON = '>=3.6, <4'
 
-REQUIRED = ['click']
+REQUIRED = ['click', 'toml', 'requests', 'rich']
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -39,7 +39,7 @@ setup(
     },
     install_requires=REQUIRED,
     extras_require={
-        'dev': ['pytest', 'pytest-cov', 'flake8'],
+        'dev': ['pytest', 'pytest-mock', 'pytest-cov', 'flake8'],
     },
     include_package_data=True,
     # Specify files to be included in the package
