@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Another Python client for tldr pages
+New Python client for tldr pages
 
 ## Installation
 
@@ -13,7 +13,23 @@ pip install pytldr
 ## Usage
 
 ```
->>> tldr
+$ tldr --help
+
+Usage: tldr [OPTIONS] [COMMAND]...
+
+  Collaborative cheatsheets for console commands.
+
+  For subcommands such as `git commit`, just keep as it is:
+
+      tldr git commit
+
+Options:
+  -v, --version                   Show version info and exit.
+  --config FILE                   Specify a config file to use.
+  -p, --platform [android|common|linux|osx|sunos|windows]
+                                  Override current operating system.
+  -u, --update                    Update local cache with all pages.
+  -h, --help                      Show this message and exit.
 ```
 
 ## Support
