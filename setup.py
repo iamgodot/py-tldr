@@ -7,15 +7,22 @@ from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = 'pytldr'
-DESCRIPTION = 'Another Python client for tldr pages'
+DESCRIPTION = 'New Python client for tldr pages'
 URL = 'https://github.com/iamgodot/pytldr'
 EMAIL = 'xugodot@gmail.com'
 AUTHOR = 'iamgodot'
 REQUIRES_PYTHON = '>=3.6, <4'
+VERSION = None
 
 REQUIRED = ['click', 'toml', 'requests', 'rich']
 
 here = os.path.abspath(os.path.dirname(__file__))
+
+# Get version
+with open(os.path.join(here, NAME, '__version__.py')) as f:
+    about = {}
+    exec(f.read(), about)
+    VERSION = about['VERSION_CLI']
 
 # Get the long description from README.md
 with open(os.path.join(here, 'README.md')) as f:
@@ -23,7 +30,7 @@ with open(os.path.join(here, 'README.md')) as f:
 
 setup(
     name=NAME,
-    version='0.0.1',
+    version=VERSION,
     description=DESCRIPTION,
     long_description=long_description,
     long_description_content_type='text/markdown',
