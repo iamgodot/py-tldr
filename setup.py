@@ -6,9 +6,9 @@ import os
 from setuptools import find_packages, setup
 
 # Package meta-data.
-NAME = 'pytldr'
+NAME = 'py-tldr'
 DESCRIPTION = 'New Python client for tldr pages'
-URL = 'https://github.com/iamgodot/pytldr'
+URL = 'https://github.com/iamgodot/py-tldr'
 EMAIL = 'xugodot@gmail.com'
 AUTHOR = 'iamgodot'
 REQUIRES_PYTHON = '>=3.6, <4'
@@ -19,7 +19,7 @@ REQUIRED = ['click', 'toml', 'requests', 'rich']
 here = os.path.abspath(os.path.dirname(__file__))
 
 # Get version
-with open(os.path.join(here, NAME, '__version__.py')) as f:
+with open(os.path.join(here, 'py_tldr', '__version__.py')) as f:
     about = {}
     exec(f.read(), about)
     VERSION = about['VERSION_CLI']
@@ -40,9 +40,9 @@ setup(
     python_requires=REQUIRES_PYTHON,
     packages=find_packages(exclude=('tests', )),
     # If your package is a single module, use this instead of 'packages':
-    # py_modules=['pytldr'],
+    # py_modules=['py_tldr'],
     entry_points={
-        'console_scripts': ['tldr=pytldr.core:cli'],
+        'console_scripts': ['tldr=py_tldr.core:cli'],
     },
     install_requires=REQUIRED,
     extras_require={

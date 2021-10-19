@@ -1,4 +1,4 @@
-REPO = 'pytldr'
+REPO = 'py-tldr'
 
 .PHONY: help venv lint test clean
 
@@ -24,4 +24,4 @@ lint:
 	flake8 --format=pylint --count
 
 test: clean lint
-	pytest --cov=pytldr tests
+	pytest --cov=py_tldr tests

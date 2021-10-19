@@ -1,6 +1,7 @@
 import toml
 
-from pytldr import cli, core
+from py_tldr import core
+from py_tldr.core import cli
 
 
 def test_version(runner):
@@ -63,7 +64,7 @@ class TestCommand:
         assert 'git commit' in result.output
 
     def test_with_update(self, mocker, runner):
-        patched_update = mocker.patch('pytldr.core.PageCache.update')
+        patched_update = mocker.patch('py_tldr.core.PageCache.update')
         result = runner.invoke(cli, ['--update', 'tldr'])
         assert result.exit_code == 0
         assert 'tldr' in result.output
@@ -72,9 +73,9 @@ class TestCommand:
 
 class TestPageGet:
     def test_by_cache(self, mocker, runner):
-        patched_get = mocker.patch('pytldr.core.PageCache.get',
+        patched_get = mocker.patch('py_tldr.core.PageCache.get',
                                    return_value='foobar')
-        patched_find = mocker.patch('pytldr.core.PageFinder.find')
+        patched_find = mocker.patch('py_tldr.core.PageFinder.find')
         result = runner.invoke(cli, ['tldr'])
         assert result.exit_code == 0
         assert 'foobar' in result.output
@@ -82,9 +83,9 @@ class TestPageGet:
         patched_find.assert_not_called()
 
     def test_by_finder(self, mocker, runner):
-        patched_get = mocker.patch('pytldr.core.PageCache.get',
+        patched_get = mocker.patch('py_tldr.core.PageCache.get',
                                    return_value=None)
-        patched_find = mocker.patch('pytldr.core.PageFinder.find',
+        patched_find = mocker.patch('py_tldr.core.PageFinder.find',
                                     return_value={
                                         'name': 'foo',
                                         'platform': 'common',
@@ -97,8 +98,8 @@ class TestPageGet:
         patched_find.assert_called_once()
 
     def test_no_result(self, mocker, runner):
-        mocker.patch('pytldr.core.PageCache.get', return_value=None)
-        mocker.patch('pytldr.core.PageFinder.find', return_value={})
+        mocker.patch('py_tldr.core.PageCache.get', return_value=None)
+        mocker.patch('py_tldr.core.PageFinder.find', return_value={})
         result = runner.invoke(cli, ['foobar'])
         assert result.exit_code == 1
         assert 'no available pages' in result.output

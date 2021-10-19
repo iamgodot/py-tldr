@@ -13,7 +13,7 @@ from rich import print as print_rich
 from rich.console import Console
 from rich.markdown import Markdown
 
-from .version import VERSION_CLI, VERSION_CLIENT_SPEC
+from .__version__ import VERSION_CLI, VERSION_CLIENT_SPEC
 
 DEFAULT_CONFIG = {
     'page_source':

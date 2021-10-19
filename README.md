@@ -1,4 +1,4 @@
-# Pytldr
+# Py-tldr
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -7,7 +7,7 @@ New Python client for tldr pages
 ## Installation
 
 ```bash
-pip install pytldr
+pip install py-tldr
 ```
 
 ## Usage
