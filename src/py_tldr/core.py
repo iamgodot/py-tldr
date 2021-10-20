@@ -1,6 +1,7 @@
 import platform as platform_
 import sys
 from datetime import datetime
+from importlib.metadata import version
 from pathlib import Path as LibPath
 from zipfile import ZipFile
 
@@ -13,8 +14,8 @@ from rich import print as print_rich
 from rich.console import Console
 from rich.markdown import Markdown
 
-from .__version__ import VERSION_CLI, VERSION_CLIENT_SPEC
-
+VERSION_CLI = version('py_tldr')
+VERSION_CLIENT_SPEC = '1.5'
 DEFAULT_CONFIG = {
     'page_source':
     'https://raw.githubusercontent.com/tldr-pages/tldr/master/pages',
