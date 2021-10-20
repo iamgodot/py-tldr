@@ -1,7 +1,6 @@
 import platform as platform_
 import sys
 from datetime import datetime
-from importlib.metadata import version
 from pathlib import Path as LibPath
 from zipfile import ZipFile
 
@@ -14,7 +13,13 @@ from rich import print as print_rich
 from rich.console import Console
 from rich.markdown import Markdown
 
-VERSION_CLI = version('py_tldr')
+try:
+    from importlib.metadata import version
+    VERSION_CLI = version('py_tldr')
+except ModuleNotFoundError:
+    from pkg_resources import get_distribution
+    VERSION_CLI = get_distribution('py_tldr').version
+
 VERSION_CLIENT_SPEC = '1.5'
 DEFAULT_CONFIG = {
     'page_source':
