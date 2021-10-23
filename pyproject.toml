@@ -4,3 +4,28 @@ requires = [
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.tbump]
+github_url = "https://github.com/iamgodot/py-tldr"
+
+[tool.tbump.version]
+current = "0.2.2"
+
+regex = '''
+  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  '''
+
+[tool.tbump.git]
+message_template = "build: bump version to v{new_version}"
+tag_template = "v{new_version}"
+
+[[tool.tbump.file]]
+src = "src/py_tldr/__init__.py"
+
+[[tool.tbump.before_commit]]
+name = "Check changelog"
+cmd = "grep -q {new_version} docs/CHANGELOG.md"
