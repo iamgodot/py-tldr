@@ -1,6 +1,7 @@
 # Py-tldr
 
 [![test](https://github.com/iamgodot/py-tldr/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/iamgodot/py-tldr/actions/workflows/test.yml)
+[![release](https://github.com/iamgodot/py-tldr/actions/workflows/release.yml/badge.svg)](https://github.com/iamgodot/py-tldr/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 New Python client for tldr pages
