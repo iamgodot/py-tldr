@@ -24,7 +24,7 @@ lint:
 	flake8 --format=pylint --count
 
 test: clean lint
-	pytest --cov=src/py_tldr tests
+	pytest -v --cov=src/py_tldr tests
 
 build:
 	rm -rf dist
