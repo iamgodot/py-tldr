@@ -20,6 +20,9 @@ clean:
 	find . -iname "*.pyc" | xargs rm -rf
 	rm -rf .pytest_cache
 
+format:
+	black .
+
 lint:
 	flake8 --format=pylint --count
 
