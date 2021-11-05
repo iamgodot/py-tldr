@@ -6,20 +6,9 @@ from zipfile import ZipFile
 
 import requests
 import toml
-from click import (
-    Choice,
-    Path,
-    argument,
-    command,
-    get_app_dir,
-    option,
-    pass_context,
-    secho,
-)
+from click import (Choice, Path, argument, command, get_app_dir, option,
+                   pass_context, secho)
 from requests.exceptions import ConnectionError, HTTPError, Timeout
-from rich import print as print_rich
-from rich.console import Console
-from rich.markdown import Markdown
 
 try:
     from importlib.metadata import version
@@ -169,38 +158,17 @@ class PageFinder:
 
 
 class Formatter:
-    """Formatter decides how pages (or other prompts) are displayed.
-
-    Now Formatter simply wraps `rich` utilities for markdown rendering,
-    which is likely to change for better output. Also styling params
-    will be exposed in the future.
-    """
+    """Formatter decides how pages (or other prompts) are displayed."""
 
     def __init__(self, content, style=None):
         self.content_orig = content
         self.content = self.content_orig.replace("{{", "").replace("}}", "")
         self.style = style
 
-    def output_markdown(self):
-        console = Console()
-        # FIXME: Syntax highlighting for inline code
-        md = Markdown(
-            self.content,
-            code_theme="",
-            inline_code_lexer="console",
-            inline_code_theme="monokai",
-        )
-        console.print(md, style=self.style)
-        # FIXME: Find a better way for end line gap
-        console.print()
-
     @classmethod
     def output(cls, content, category=None, style=None):
         formatter = cls(content, style=style)
-        if category == "markdown":
-            formatter.output_markdown()
-        else:
-            print_rich(formatter.content)
+        secho(formatter.content)
 
 
 def guess_os():
@@ -216,8 +184,8 @@ def guess_os():
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
-    Formatter.output(f"tldr version {VERSION_CLI}")
-    Formatter.output(f"client specification version {VERSION_CLIENT_SPEC}")
+    secho(f"tldr version {VERSION_CLI}", fg="green")
+    secho(f"client specification version {VERSION_CLIENT_SPEC}", fg="green")
     ctx.exit()
 
 
@@ -320,8 +288,11 @@ def cli(ctx, config, command, platform, update):
     if page_content:
         Formatter.output(page_content, category="markdown")
     else:
-        Formatter.output("There is no available pages right now.")
-        Formatter.output(
-            "Create an issue here: https://github.com/tldr-pages/tldr/issues"
+        secho(
+            """
+            There is no available pages right now.
+            You can create an issue via https://github.com/tldr-pages/tldr/issues.
+            """,
+            fg="yellow",
         )
         sys.exit(1)
