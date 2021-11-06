@@ -1,6 +1,7 @@
 import platform as platform_
 import sys
 from datetime import datetime
+from functools import partial
 from pathlib import Path as LibPath
 from zipfile import ZipFile
 
@@ -33,6 +34,9 @@ DEFAULT_CONFIG = {
 DEFAULT_CONFIG_DIR = LibPath(get_app_dir("tldr"))
 DEFAULT_CONFIG_FILE = DEFAULT_CONFIG_DIR / "config.toml"
 DEFAULT_CACHE_DIR = LibPath.home() / ".cache" / "tldr"
+
+info = partial(secho, bold=True, fg="green")
+warn = partial(secho, bold=True, fg="yellow")
 
 
 class PageCache:
@@ -246,8 +250,8 @@ def guess_os():
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
-    secho(f"tldr version {VERSION_CLI}", fg="green")
-    secho(f"client specification version {VERSION_CLIENT_SPEC}", fg="green")
+    info(f"tldr version {VERSION_CLI}")
+    info(f"client specification version {VERSION_CLIENT_SPEC}")
     ctx.exit()
 
 
@@ -265,15 +269,15 @@ def setup_config(ctx, param, value):
         config_file = DEFAULT_CONFIG_FILE
 
         if not config_file.exists():
-            secho("No config file found, setting it up...", fg="yellow")
+            warn("No config file found, setting it up...")
             config_dir.mkdir(parents=True, exist_ok=True)
             with open(config_file, "w") as f:
                 toml.dump(DEFAULT_CONFIG, f)
-            secho(f"Config file created: {config_file}", fg="yellow")
+            warn(f"Config file created: {config_file}")
             config = DEFAULT_CONFIG
     else:
         config_file = value
-        secho(f"Using config file from {config_file}", fg="yellow")
+        warn(f"Using config file from {config_file}")
 
     if not config:
         with open(config_file) as f:
@@ -322,7 +326,7 @@ def cli(ctx, config, command, platform, update):
     )
     if update:
         page_cache.update()
-        secho("Finish cache update.", fg="green", bold=True)
+        info("Finish cache update.")
 
     if not command:
         if not update:
@@ -352,11 +356,6 @@ def cli(ctx, config, command, platform, update):
             page_content, indent_spaces=4, is_page=True, start_with_new_line=True
         )
     else:
-        secho(
-            """
-            There is no available pages right now.
-            You can create an issue via https://github.com/tldr-pages/tldr/issues.
-            """,
-            fg="yellow",
-        )
+        warn("There is no available pages right now.")
+        warn("You can create an issue via https://github.com/tldr-pages/tldr/issues.")
         sys.exit(1)
