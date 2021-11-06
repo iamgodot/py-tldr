@@ -10,6 +10,8 @@ import toml
 from click import (Choice, Path, argument, command, get_app_dir, option,
                    pass_context, secho, style)
 from requests.exceptions import ConnectionError, HTTPError, Timeout
+from yaspin import yaspin
+from yaspin.spinners import Spinners
 
 try:
     from importlib.metadata import version
@@ -325,8 +327,10 @@ def cli(ctx, config, command, platform, update):
         proxy_url=config["proxy_url"],
     )
     if update:
-        page_cache.update()
-        info("Finish cache update.")
+        with yaspin(Spinners.arc, text="Downloading pages...") as sp:
+            page_cache.update()
+            sp.write("> Download complete.")
+        info("All caches updated.")
 
     if not command:
         if not update:
@@ -346,7 +350,12 @@ def cli(ctx, config, command, platform, update):
     if config["cache"]["enabled"]:
         page_content = page_cache.get(command, config["platform"])
     if not page_content:
-        result = page_finder.find(command)
+        with yaspin(Spinners.arc, text="Searching pages...") as sp:
+            result = page_finder.find(command)
+            if result:
+                sp.write("> Page found.")
+            else:
+                sp.write("> No result.")
         if result:
             page_cache.set(**result)
         page_content = result.get("content")
