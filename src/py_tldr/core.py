@@ -7,7 +7,7 @@ from zipfile import ZipFile
 import requests
 import toml
 from click import (Choice, Path, argument, command, get_app_dir, option,
-                   pass_context, secho)
+                   pass_context, secho, style)
 from requests.exceptions import ConnectionError, HTTPError, Timeout
 
 try:
@@ -158,17 +158,79 @@ class PageFinder:
 
 
 class Formatter:
-    """Formatter decides how pages (or other prompts) are displayed."""
+    """Formatter decides how pages (or other prompts) are displayed.
 
-    def __init__(self, content, style=None):
-        self.content_orig = content
-        self.content = self.content_orig.replace("{{", "").replace("}}", "")
-        self.style = style
+    Attributes:
+        buffer: Content will be split by lines and stored in this list
+          before any other operations.
+        start_with_new_line: Add extra new line in the begining.
+
+    Methods:
+        output: As a class method and should be the only interface to use
+          Formatter. Raw content will be processed, rendered and print in
+          order before the final result was output.
+    """
+
+    def __init__(
+        self, content, is_page=False, indent_spaces=0, start_with_new_line=False
+    ):
+        self.content = content
+        self.buffer = []
+        self.is_page = is_page
+        self.indent_spaces = indent_spaces
+        self.start_with_new_line = start_with_new_line
+
+    def process_content(self):
+        for line in self.content.split("\n"):
+            line = line.strip()
+            if self.is_page:
+                for sym in ("{{", "}}", "`"):
+                    line = line.replace(sym, "")
+            self.buffer.append(line)
+
+    def render_text(self, **args):
+        rendered_lines = []
+        if not self.is_page:
+            rendered_lines = [style(line, **args) for line in self.buffer]
+        else:
+            for line in self.buffer:
+                if line == "":
+                    pass
+                elif line[0] == "#":
+                    line = style(line[2:], bold=True, fg="red")
+                elif line[0] == ">":
+                    line = line[2:].replace("<", "").replace(">", "")
+                    line = style(line, fg="yellow", underline=True)
+                elif line[0] == "-":
+                    line = style("\u2022" + line[1:], fg="green")
+                else:
+                    line = style("  " + line, fg="magenta")
+                rendered_lines.append(line)
+        self.buffer = rendered_lines
+
+    def print(self, value=""):
+        secho(f'{" "*self.indent_spaces}{value}')
 
     @classmethod
-    def output(cls, content, category=None, style=None):
-        formatter = cls(content, style=style)
-        secho(formatter.content)
+    def output(
+        cls,
+        content,
+        indent_spaces=0,
+        is_page=False,
+        start_with_new_line=False,
+        **args,
+    ):
+        if not isinstance(content, str):
+            raise ValueError("Formatter only accept strings")
+        if not content:
+            return
+        formatter = cls(content, is_page, indent_spaces, start_with_new_line)
+        formatter.process_content()
+        formatter.render_text(**args)
+        if formatter.start_with_new_line:
+            formatter.print()
+        for line in formatter.buffer:
+            formatter.print(line)
 
 
 def guess_os():
@@ -286,7 +348,9 @@ def cli(ctx, config, command, platform, update):
         page_content = result.get("content")
 
     if page_content:
-        Formatter.output(page_content, category="markdown")
+        Formatter.output(
+            page_content, indent_spaces=4, is_page=True, start_with_new_line=True
+        )
     else:
         secho(
             """
