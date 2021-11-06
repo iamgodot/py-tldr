@@ -1,10 +1,9 @@
 # Py-tldr
 
-[![test](https://github.com/iamgodot/py-tldr/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/iamgodot/py-tldr/actions/workflows/test.yml)
-[![release](https://github.com/iamgodot/py-tldr/actions/workflows/release.yml/badge.svg)](https://github.com/iamgodot/py-tldr/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![test](https://github.com/iamgodot/py-tldr/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/iamgodot/py-tldr/actions/workflows/test.yml)
 
-New Python client for tldr pages
+Py-tldr is a new Python client for tldr pages based on [Click](https://github.com/pallets/click).
 
 ## Installation
 
@@ -36,11 +35,13 @@ Options:
 
 ## Support
 
-python3.6+
+Python: 3.6, 3.7, 3.8, 3.9
+
+OS: Not fully tested on Windows so there's uncertainty with color rendering.
 
 ## Changelog
 
-[Here](docs/CHANGELOG.md)
+See [CHANGELOG](docs/CHANGELOG.md)
 
 ## License
 
