@@ -3,7 +3,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![test](https://github.com/iamgodot/py-tldr/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/iamgodot/py-tldr/actions/workflows/test.yml)
 
-Py-tldr is a new Python client for tldr pages based on [Click](https://github.com/pallets/click).
+Py-tldr is a new Python client for [tldr pages](https://github.com/tldr-pages/tldr) based on [Click](https://github.com/pallets/click).
+
+![](images/demo.gif)
 
 ## Installation
 
@@ -32,6 +34,23 @@ Options:
   -u, --update                    Update local cache with all pages.
   -h, --help                      Show this message and exit.
 ```
+
+By default a config file will be generated in `~/.config/tldr`:
+
+```toml
+page_source = "https://raw.githubusercontent.com/tldr-pages/tldr/master/pages"
+language = "en"
+proxy_url = ""
+
+[cache]
+enabled = true
+timeout = 24
+download_url = "https://tldr-pages.github.io/assets/tldr.zip"
+```
+
+Cache is enabled implicitly, with 24 hours as expiration time.
+
+A proxy url can be set for convenience, proxy envs such as HTTP_PROXY will also work.
 
 ## Support
 
