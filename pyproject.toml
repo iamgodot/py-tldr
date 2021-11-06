@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 github_url = "https://github.com/iamgodot/py-tldr"
 
 [tool.tbump.version]
-current = "0.3.0"
+current = "0.4.0"
 
 regex = '''
   (?P<major>\d+)
