@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add language option.
 - TBC
 
+## [0.4.0] - 2021-11-06
+### Added
+- Add spinners for better user experience.
+
 ## [0.3.0] - 2021-11-06
 ### Removed
 - Remove `Rich` since it's too heavy and not ideal for MarkDown rendering.
