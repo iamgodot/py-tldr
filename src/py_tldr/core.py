@@ -75,15 +75,16 @@ class PageCache:
                 datetime.now() - datetime.fromtimestamp(mtime_ts)
             ).total_seconds() / 3600
             return age <= self.timeout
-
         return False
 
     def get(self, name: str, platform: str) -> str:
+        res = ""
         for platform in ["common", platform]:
             page_file = self._make_page_file(platform, name)
             if self._validate_page_file(page_file):
                 with open(page_file) as f:
-                    return f.read()
+                    res = f.read()
+        return res
 
     def set(self, name: str, platform: str, content: str):
         (self.location / platform).mkdir(parents=True, exist_ok=True)
@@ -159,7 +160,6 @@ class PageFinder:
             result = self._query(self._make_page_url(name, platform))
             if result:
                 return {"name": name, "content": result, "platform": platform}
-
         return {}
 
 
@@ -284,7 +284,6 @@ def setup_config(ctx, param, value):
     if not config:
         with open(config_file) as f:
             config = toml.load(f)
-
     return config
 
 

@@ -1,5 +1,4 @@
-from datetime import datetime
-from os import utime
+from time import sleep
 
 import pytest
 import toml
@@ -42,13 +41,12 @@ class TestConfig:
 
 class TestCache:
     def test_validation(self, tmp_path):
-        page_file = tmp_path / "foo.md"
-        page_file.touch()
-        cache = core.PageCache(1, tmp_path, "")
-        assert cache._validate_page_file(page_file) is True
-        ts = datetime.now().timestamp() - 3601
-        utime(page_file, (ts, ts))
-        assert cache._validate_page_file(page_file) is False
+        cache = core.PageCache(1 / 3600 / 10, tmp_path, "")
+        name, platform, content = "foo", "common", "bar"
+        cache.set(name, platform, content)
+        assert cache.get(name, platform) == content
+        sleep(0.1)
+        assert cache.get(name, platform) == ""
 
     def test_update(self):
         pass
