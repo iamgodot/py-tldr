@@ -7,9 +7,11 @@ from zipfile import ZipFile
 
 import requests
 import toml
-from click import (Choice, Path, argument, command, get_app_dir, option,
-                   pass_context, secho, style)
-from requests.exceptions import ConnectionError, HTTPError, Timeout
+from click import Choice, Path, argument
+from click import command as command_
+from click import get_app_dir, option, pass_context, secho, style
+from requests.exceptions import ConnectionError as ConnectionError_
+from requests.exceptions import HTTPError, Timeout
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
@@ -79,30 +81,30 @@ class PageCache:
 
     def get(self, name: str, platform: str) -> str:
         res = ""
-        for platform in ["common", platform]:
-            page_file = self._make_page_file(platform, name)
+        for pf in ["common", platform]:
+            page_file = self._make_page_file(pf, name)
             if self._validate_page_file(page_file):
-                with open(page_file) as f:
+                with open(page_file, encoding="utf8") as f:
                     res = f.read()
         return res
 
     def set(self, name: str, platform: str, content: str):
         (self.location / platform).mkdir(parents=True, exist_ok=True)
         page_file = self._make_page_file(platform, name)
-        with open(page_file, "w") as f:
+        with open(page_file, "w", encoding="utf8") as f:
             f.write(content)
 
     def update(self):
         """Download all latest pages."""
         tldr_zip = self.location_base / "tldr.zip"
         try:
-            with open(tldr_zip, "wb") as f:
+            with open(tldr_zip, "wb", encoding="utf8") as f:
                 resp = requests.get(
                     self.download_url, proxies={"https": self.proxy_url}, timeout=3
                 )
                 resp.raise_for_status()
                 f.write(resp.content)
-        except (ConnectionError, HTTPError, Timeout):
+        except (ConnectionError_, HTTPError, Timeout):
             # FIXME: Do something useful
             return
 
@@ -148,11 +150,10 @@ class PageFinder:
             resp = requests.get(url, proxies=proxies, timeout=3)
             resp.raise_for_status()
             result = resp.text
-        except (ConnectionError, HTTPError, Timeout):
+        except (ConnectionError_, HTTPError, Timeout):
             # FIXME: Do something useful
             pass
-        finally:
-            return result
+        return result
 
     def find(self, name: str) -> dict:
         result = self._query(self._make_page_url(name, "common"))
@@ -249,7 +250,7 @@ def guess_os():
     return system_to_platform.get(platform_.system(), "linux")
 
 
-def print_version(ctx, param, value):
+def print_version(ctx, param, value):  # pylint: disable=unused-argument
     if not value or ctx.resilient_parsing:
         return
     info(f"tldr version {VERSION_CLI}")
@@ -257,7 +258,7 @@ def print_version(ctx, param, value):
     ctx.exit()
 
 
-def setup_config(ctx, param, value):
+def setup_config(ctx, param, value):  # pylint: disable=unused-argument
     """Build a config dict from either default or custom path.
 
     Currently custom config file is used without validation, so
@@ -273,7 +274,7 @@ def setup_config(ctx, param, value):
         if not config_file.exists():
             warn("No config file found, setting it up...")
             config_dir.mkdir(parents=True, exist_ok=True)
-            with open(config_file, "w") as f:
+            with open(config_file, "w", encoding="utf8") as f:
                 toml.dump(DEFAULT_CONFIG, f)
             warn(f"Config file created: {config_file}")
             config = DEFAULT_CONFIG
@@ -282,12 +283,12 @@ def setup_config(ctx, param, value):
         warn(f"Using config file from {config_file}")
 
     if not config:
-        with open(config_file) as f:
+        with open(config_file, encoding="utf8") as f:
             config = toml.load(f)
     return config
 
 
-@command(context_settings={"help_option_names": ["-h", "--help"]})
+@command_(context_settings={"help_option_names": ["-h", "--help"]})
 @option(
     "-v",
     "--version",
