@@ -1,3 +1,6 @@
+from datetime import datetime
+from os import utime
+
 import pytest
 import toml
 from click import style
@@ -22,14 +25,14 @@ class TestConfig:
         result = runner.invoke(cli, [])
         assert result.exit_code == 0
         assert tmp_file.exists()
-        with open(tmp_file) as f:
+        with open(tmp_file, encoding="utf8") as f:
             config = toml.load(f)
             assert config == core.DEFAULT_CONFIG
 
     def test_custom(self, tmp_path, mocker):
         config = {"foo": "bar"}
         config_file = tmp_path / "custom.toml"
-        with open(config_file, "w") as f:
+        with open(config_file, "w", encoding="utf8") as f:
             toml.dump(config, f)
 
         ctx = mocker.Mock(spec=["resilient_parsing"])
@@ -38,20 +41,16 @@ class TestConfig:
 
 
 class TestCache:
-    def test_validation(self, tmp_path, mocker):
+    def test_validation(self, tmp_path):
         page_file = tmp_path / "foo.md"
         page_file.touch()
         cache = core.PageCache(1, tmp_path, "")
         assert cache._validate_page_file(page_file) is True
-
-        from datetime import datetime
-        from os import utime
-
         ts = datetime.now().timestamp() - 3601
         utime(page_file, (ts, ts))
         assert cache._validate_page_file(page_file) is False
 
-    def test_update(self, runner):
+    def test_update(self):
         pass
 
 
@@ -118,7 +117,7 @@ class TestFormatter:
         formatter.process_content()
         assert formatter.buffer == ["foo", "bar", "bat", ""]
 
-    def test_render(self, mocker, capsys):
+    def test_render(self, mocker):
         patched_print = mocker.patch("py_tldr.core.Formatter.print")
         Formatter.output("foobar", bold=True, fg="red")
         patched_print.assert_called_with(style("foobar", bold=True, fg="red"))
