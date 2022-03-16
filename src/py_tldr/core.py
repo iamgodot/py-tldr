@@ -10,7 +10,7 @@ from click import get_app_dir, option, pass_context, secho
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
-from .page import Formatter, PageCache, PageFinder
+from .page import PageCache, PageFinder, PageFormatter
 
 try:
     from importlib.metadata import version
@@ -161,8 +161,10 @@ def cli(ctx, config, command, platform, update):
         page_content = result.get("content")
 
     if page_content:
-        Formatter.output(
-            page_content, indent_spaces=4, is_page=True, start_with_new_line=True
+        print(
+            PageFormatter(indent_spaces=4, start_with_new_line=True).format(
+                page_content
+            )
         )
     else:
         warn("There is no available pages right now.")

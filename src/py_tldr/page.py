@@ -3,7 +3,7 @@ from pathlib import Path as LibPath
 from zipfile import ZipFile
 
 import requests
-from click import secho, style
+from click import style
 from requests.exceptions import ConnectionError as ConnectionError_
 from requests.exceptions import HTTPError, Timeout
 
@@ -130,76 +130,64 @@ class PageFinder:
 
 
 class Formatter:
-    """Formatter decides how pages (or other prompts) are displayed.
-
-    Attributes:
-        buffer: Content will be split by lines and stored in this list
-          before any other operations.
-        start_with_new_line: Add extra new line in the begining.
+    """Formatter decides how text contents are displayed.
 
     Methods:
-        output: As a class method and should be the only interface to use
-          Formatter. Raw content will be processed, rendered and print in
-          order before the final result was output.
+        format: This should be the only method to use a formatter. To each line
+            in raw content, it will render and arrange them before returning
+            everything in the buffer.
     """
 
     def __init__(
-        self, content, is_page=False, indent_spaces=0, start_with_new_line=False
-    ):
-        self.content = content
-        self.buffer = []
-        self.is_page = is_page
+        self,
+        *,
+        indent_spaces: int = 0,
+        start_with_new_line=False,
+    ) -> None:
         self.indent_spaces = indent_spaces
         self.start_with_new_line = start_with_new_line
+        self._buffer = []
 
-    def process_content(self):
-        for line in self.content.split("\n"):
-            line = line.strip()
-            if self.is_page:
-                for sym in ("{{", "}}", "`"):
-                    line = line.replace(sym, "")
-            self.buffer.append(line)
+    def _write(self, line: str) -> None:
+        self._buffer.append(line)
 
-    def render_text(self, **args):
-        rendered_lines = []
-        if not self.is_page:
-            rendered_lines = [style(line, **args) for line in self.buffer]
+    def format(self, content: str) -> str:
+        for line in content.strip().split("\n"):  # Keep empty lines
+            rendered = self.render(line.strip())
+            arranged = self.arrange(rendered)
+            self._write(arranged)
+
+        formatted = "".join(self._buffer)
+        if self.start_with_new_line:
+            formatted = f"\n{formatted}"
+        return formatted
+
+    def render(self, line: str) -> str:
+        return f"{line}\n"
+
+    def arrange(self, line: str) -> str:
+        if not line.strip():
+            return line
+        return " " * self.indent_spaces + line
+
+
+class PageFormatter(Formatter):
+    def render(self, line: str) -> str:
+        # Remove token syntax symbols, check style guide for tldr pages
+        # TODO: highlight tokens
+        for sym in ("{{", "}}", "`"):
+            line = line.replace(sym, "")
+
+        # Render markdown texts
+        if not line:
+            pass
+        elif line[0] == "#":
+            line = style(line[2:], bold=True, fg="red")
+        elif line[0] == ">":
+            line = line[2:].replace("<", "").replace(">", "")
+            line = style(line, fg="yellow", underline=True)
+        elif line[0] == "-":
+            line = style("\u2022" + line[1:], fg="green")
         else:
-            for line in self.buffer:
-                if line == "":
-                    pass
-                elif line[0] == "#":
-                    line = style(line[2:], bold=True, fg="red")
-                elif line[0] == ">":
-                    line = line[2:].replace("<", "").replace(">", "")
-                    line = style(line, fg="yellow", underline=True)
-                elif line[0] == "-":
-                    line = style("\u2022" + line[1:], fg="green")
-                else:
-                    line = style("  " + line, fg="magenta")
-                rendered_lines.append(line)
-        self.buffer = rendered_lines
-
-    def print(self, value=""):
-        secho(f'{" "*self.indent_spaces}{value}')
-
-    @classmethod
-    def output(
-        cls,
-        content,
-        indent_spaces=0,
-        is_page=False,
-        start_with_new_line=False,
-        **args,
-    ):
-        if not isinstance(content, str):
-            raise ValueError("Formatter only accept strings")
-        if not content:
-            return
-        formatter = cls(content, is_page, indent_spaces, start_with_new_line)
-        formatter.process_content()
-        formatter.render_text(**args)
-        if formatter.start_with_new_line:
-            formatter.print()
-        for line in formatter.buffer:
-            formatter.print(line)
+            line = style("  " + line, fg="magenta")
+        return super().render(line)
