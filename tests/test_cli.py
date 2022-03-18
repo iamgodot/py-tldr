@@ -47,7 +47,7 @@ class TestCommand:
         assert "git commit" in result.output
 
     def test_with_update(self, mocker, runner):
-        patched_update = mocker.patch("py_tldr.core.PageCache.update")
+        patched_update = mocker.patch("py_tldr.page.PageCache.update")
         result = runner.invoke(cli, ["--update", "tldr"])
         assert result.exit_code == 0
         assert "tldr" in result.output

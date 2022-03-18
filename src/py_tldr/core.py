@@ -10,7 +10,7 @@ from click import get_app_dir, option, pass_context, secho
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
-from .page import PageCache, PageFinder, PageFormatter
+from .page import PageFinder, PageFormatter
 
 try:
     from importlib.metadata import version
@@ -75,17 +75,8 @@ def setup_config(ctx, param, value):  # pylint: disable=unused-argument
     if not config:
         with open(config_file, encoding="utf8") as f:
             config = toml.load(f)
+    # TODO: config validation
     return config
-
-
-def guess_os():
-    system_to_platform = {
-        "Linux": "linux",
-        "Darwin": "osx",
-        "Java": "sunos",
-        "Windows": "windows",
-    }
-    return system_to_platform.get(platform_.system(), "linux")
 
 
 @command_(context_settings={"help_option_names": ["-h", "--help"]})
@@ -120,15 +111,11 @@ def cli(ctx, config, command, platform, update):
 
         tldr git commit
     """
-    page_cache = PageCache(
-        timeout=config["cache"]["timeout"],
-        location_base=DEFAULT_CACHE_DIR,
-        download_url=config["cache"]["download_url"],
-        proxy_url=config["proxy_url"],
-    )
+    page_finder = make_page_finder(config)
     if update:
         with yaspin(Spinners.arc, text="Downloading pages...") as sp:
-            page_cache.update()
+            # page_cache.update()
+            page_finder.sync()
             sp.write("> Download complete.")
         info("All caches updated.")
 
@@ -139,34 +126,46 @@ def cli(ctx, config, command, platform, update):
     else:
         command = "-".join(command)
 
-    config["platform"] = platform or guess_os()
-    page_finder = PageFinder(
-        source_url=config["page_source"],
-        platform=config["platform"],
-        language=config["language"],
-        proxy_url=config["proxy_url"],
-    )
-    page_content = None
-    if config["cache"]["enabled"]:
-        page_content = page_cache.get(command, config["platform"])
-    if not page_content:
-        with yaspin(Spinners.arc, text="Searching pages...") as sp:
-            result = page_finder.find(command)
-            if result:
-                sp.write("> Page found.")
-            else:
-                sp.write("> No result.")
-        if result:
-            page_cache.set(**result)
-        page_content = result.get("content")
+    content = None
+    with yaspin(Spinners.arc, text="Searching pages...") as sp:
+        if content := page_finder.find(command, platform or guess_os()):
+            sp.write("> Page found.")
+        else:
+            sp.write("> No result.")
 
-    if page_content:
-        print(
-            PageFormatter(indent_spaces=4, start_with_new_line=True).format(
-                page_content
-            )
-        )
+    if content:
+        print(PageFormatter(indent_spaces=4, start_with_new_line=True).format(content))
     else:
         warn("There is no available pages right now.")
         warn("You can create an issue via https://github.com/tldr-pages/tldr/issues.")
         sys.exit(1)
+
+
+def make_page_finder(config=None) -> PageFinder:
+    if not config:
+        config = DEFAULT_CONFIG
+    source_url = config["page_source"]
+    cache_config = config["cache"]
+    cache_timeout = cache_config["timeout"]
+    cache_location = DEFAULT_CACHE_DIR
+    cache_download_url = cache_config["download_url"]
+    cache_enabled = cache_config["enabled"]
+    proxy_url = config["proxy_url"]
+    return PageFinder(
+        source_url,
+        cache_timeout,
+        cache_location,
+        cache_download_url,
+        cache_enabled,
+        proxy_url,
+    )
+
+
+def guess_os():
+    system_to_platform = {
+        "Linux": "linux",
+        "Darwin": "osx",
+        "Java": "sunos",
+        "Windows": "windows",
+    }
+    return system_to_platform.get(platform_.system(), "linux")

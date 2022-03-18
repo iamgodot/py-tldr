@@ -1,12 +1,12 @@
 from time import sleep
 
-from py_tldr import core
-from py_tldr.core import cli
+from py_tldr.core import make_page_finder
+from py_tldr.page import PageCache
 
 
 class TestCache:
     def test_validation(self, tmp_path):
-        cache = core.PageCache(1 / 3600 / 10, tmp_path, "")
+        cache = PageCache(1 / 3600 / 10, tmp_path, "")
         name, platform, content = "foo", "common", "bar"
         cache.set(name, platform, content)
         assert cache.get(name, platform) == content
@@ -17,31 +17,33 @@ class TestCache:
         pass
 
 
-class TestPageGet:
-    def test_by_cache(self, mocker, runner):
-        patched_get = mocker.patch("py_tldr.core.PageCache.get", return_value="foobar")
-        patched_find = mocker.patch("py_tldr.core.PageFinder.find")
-        result = runner.invoke(cli, ["tldr"])
-        assert result.exit_code == 0
-        assert "foobar" in result.output
-        patched_get.assert_called_once()
-        patched_find.assert_not_called()
+class TestPageFinder:
+    page_finder = make_page_finder()
 
-    def test_by_finder(self, mocker, runner):
-        patched_get = mocker.patch("py_tldr.core.PageCache.get", return_value=None)
-        patched_find = mocker.patch(
-            "py_tldr.core.PageFinder.find",
-            return_value={"name": "foo", "platform": "common", "content": "bar"},
+    def test_by_cache(self, mocker):
+        patched_get = mocker.patch("py_tldr.page.PageCache.get", return_value="foobar")
+        patched_query = mocker.patch("py_tldr.page.PageFinder._query")
+
+        assert self.page_finder.find("tldr") == "foobar"
+        patched_get.assert_called_once()
+        patched_query.assert_not_called()
+
+    def test_by_finder(self, mocker):
+        patched_get = mocker.patch("py_tldr.page.PageCache.get", return_value="")
+        patched_query = mocker.patch(
+            "py_tldr.page.PageFinder._query", return_value="foobar"
         )
-        result = runner.invoke(cli, ["tldr"])
-        assert result.exit_code == 0
-        assert "bar" in result.output
-        patched_get.assert_called_once()
-        patched_find.assert_called_once()
+        patched_set = mocker.patch("py_tldr.page.PageCache.set")
 
-    def test_no_result(self, mocker, runner):
-        mocker.patch("py_tldr.core.PageCache.get", return_value=None)
-        mocker.patch("py_tldr.core.PageFinder.find", return_value={})
-        result = runner.invoke(cli, ["foobar"])
-        assert result.exit_code == 1
-        assert "no available pages" in result.output
+        assert self.page_finder.find("tldr") == "foobar"
+        patched_get.assert_called_once()
+        patched_query.assert_called_once()
+        patched_set.assert_called_once()
+
+    def test_no_result(self, mocker):
+        patched_get = mocker.patch("py_tldr.page.PageCache.get", return_value="")
+        patched_query = mocker.patch("py_tldr.page.PageFinder._query", return_value="")
+
+        assert self.page_finder.find("tldr") == ""
+        patched_get.assert_called_once()
+        patched_query.assert_called_once()

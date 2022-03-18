@@ -76,7 +76,7 @@ class PageCache:
         with ZipFile(tldr_zip, "r") as f:
             f.extractall(self.location_base)
 
-        # Remove unnecessary files, like tldr.zip / index.json / LICENSE.md
+        # Remove non-page files, such as tldr.zip, index.json and LICENSE.md
         tldr_zip.unlink()
         for item in self.location_base.iterdir():
             if item.is_file():
@@ -93,17 +93,25 @@ class PageFinder:
 
     Attributes:
         source_url: Indicate where tldr pages are located.
-        platform: `common` will be used together with this since tldr
-          merges shared entries under it.
     """
 
     def __init__(
-        self, source_url: str, platform: str, language: str = "", proxy_url: str = None
+        self,
+        source_url: str,
+        cache_timeout: int,
+        cache_location: str,
+        cache_download_url: str,
+        cache_enabled: bool = True,
+        proxy_url: str = None,
     ):
-        self.language = "" if language == "en" else language
-        self.source_url = ".".join([source_url, self.language]).strip(".")
-        self.platform = platform
+        self.source_url = source_url
+        self.cache_timeout = cache_timeout
+        self.cache_location = cache_location
+        self.cache_enabled = cache_enabled
         self.proxy_url = proxy_url
+        self.cache = PageCache(
+            cache_timeout, cache_location, cache_download_url, proxy_url
+        )
 
     def _make_page_url(self, name: str, platform: str) -> str:
         return "/".join([self.source_url, platform, name + ".md"])
@@ -120,13 +128,22 @@ class PageFinder:
             pass
         return result
 
-    def find(self, name: str) -> dict:
-        result = self._query(self._make_page_url(name, "common"))
-        for platform in ["common", self.platform]:
-            result = self._query(self._make_page_url(name, platform))
-            if result:
-                return {"name": name, "content": result, "platform": platform}
-        return {}
+    def find(self, name: str, platform: str = "") -> str:
+        content = ""
+        if self.cache_enabled:
+            content = self.cache.get(name, platform)
+        if not content:
+            # tldr merges shared entries under `common` folder
+            platform = "" if platform == "common" else platform
+            for pf in filter(None, ["common", platform]):
+                if content := self._query(self._make_page_url(name, pf)):
+                    if self.cache_enabled:
+                        self.cache.set(name, pf, content)
+                    break
+        return content
+
+    def sync(self) -> None:
+        self.cache.update()
 
 
 class Formatter:
