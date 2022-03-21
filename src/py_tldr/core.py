@@ -1,16 +1,21 @@
 import platform as platform_
 import sys
 from functools import partial
+from os import environ
 from pathlib import Path as LibPath
 
 import toml
 from click import Choice, Path, argument
 from click import command as command_
 from click import get_app_dir, option, pass_context, secho
+from IPython.core import ultratb
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
 from .page import PageFinder, PageFormatter
+
+if environ.get("DEBUG"):
+    sys.excepthook = ultratb.FormattedTB(mode="Plain", color_scheme="Linux", call_pdb=1)
 
 try:
     from importlib.metadata import version

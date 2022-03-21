@@ -2,3 +2,4 @@ click==8.0.3
 toml==0.10.2
 requests==2.26.0
 yaspin==2.1.0
+ipython==7.10.0
