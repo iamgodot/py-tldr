@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Add language option.
 
+## [0.5.1] - 2022-03-28
+### Changed
+- Fix 404 response boolean evaluation.
+- Rename `build` as `rebuild` in Makefile.
+
 ## [0.5.0] - 2022-03-28
 ### Added
 - Better prompts against network conditions.
