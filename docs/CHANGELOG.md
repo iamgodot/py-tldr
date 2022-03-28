@@ -6,7 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Add language option.
-- TBC
+
+## [0.5.0] - 2022-03-28
+### Added
+- Better prompts against network conditions.
+- `DEBUG` env for exception hook.
+- Massive code refactor.
 
 ## [0.4.0] - 2021-11-06
 ### Added
