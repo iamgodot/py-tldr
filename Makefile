@@ -29,9 +29,9 @@ lint:
 test: clean lint
 	pytest -v --cov=src/py_tldr tests
 
-build:
+rebuild:
 	rm -rf dist
 	python -m build
 
-release: build
+release: rebuild
 	twine upload dist/* --verbose
