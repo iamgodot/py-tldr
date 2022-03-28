@@ -89,8 +89,8 @@ def download_data(url, proxies: dict = None, timeout: int = 3) -> bytes:
         resp.raise_for_status()
         return resp.content
     except (ConnectionError_, HTTPError, Timeout) as exc:
-        if exc.response:
-            err = DownloadError(exc.response.status_code)
+        if exc.response is not None:
+            err = DownloadError(status_code=exc.response.status_code)
         else:
             err = DownloadError()
         raise err
