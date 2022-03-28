@@ -136,7 +136,8 @@ class PageFinder:
             # tldr merges shared entries under `common` folder
             platform = "" if platform == "common" else platform
             for pf in filter(None, ["common", platform]):
-                if content := self._query(self._make_page_url(name, pf)):
+                content = self._query(self._make_page_url(name, pf))
+                if content:
                     if self.cache_enabled:
                         self.cache.set(name, pf, content)
                     break

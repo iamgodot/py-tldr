@@ -133,7 +133,8 @@ def cli(ctx, config, command, platform, update):
 
     content = None
     with yaspin(Spinners.arc, text="Searching pages...") as sp:
-        if content := page_finder.find(command, platform or guess_os()):
+        content = page_finder.find(command, platform or guess_os())
+        if content:
             sp.write("> Page found.")
         else:
             sp.write("> No result.")
