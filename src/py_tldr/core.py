@@ -12,7 +12,7 @@ from IPython.core import ultratb
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
-from .page import PageFinder, PageFormatter
+from .page import DownloadError, PageFinder, PageFormatter
 
 if environ.get("DEBUG"):
     sys.excepthook = ultratb.FormattedTB(mode="Plain", color_scheme="Linux", call_pdb=1)
@@ -117,10 +117,14 @@ def cli(ctx, config, command, platform, update):
         tldr git commit
     """
     page_finder = make_page_finder(config)
+
     if update:
         with yaspin(Spinners.arc, text="Downloading pages...") as sp:
-            # page_cache.update()
-            page_finder.sync()
+            try:
+                page_finder.sync()
+            except DownloadError:
+                sp.write("> Sync failed, check your network and try again.")
+                sys.exit(1)
             sp.write("> Download complete.")
         info("All caches updated.")
 
@@ -133,7 +137,11 @@ def cli(ctx, config, command, platform, update):
 
     content = None
     with yaspin(Spinners.arc, text="Searching pages...") as sp:
-        content = page_finder.find(command, platform or guess_os())
+        try:
+            content = page_finder.find(command, platform or guess_os())
+        except DownloadError:
+            sp.write("> Search failed, check your network and try again.")
+            sys.exit(1)
         if content:
             sp.write("> Page found.")
         else:

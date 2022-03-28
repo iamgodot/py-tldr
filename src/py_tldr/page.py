@@ -1,4 +1,5 @@
 from datetime import datetime
+from http import HTTPStatus
 from pathlib import Path as LibPath
 from zipfile import ZipFile
 
@@ -61,17 +62,10 @@ class PageCache:
 
     def update(self):
         """Download all latest pages."""
+        data = download_data(self.download_url, proxies={"https": self.proxy_url})
         tldr_zip = self.location_base / "tldr.zip"
-        try:
-            with open(tldr_zip, "wb", encoding="utf8") as f:
-                resp = requests.get(
-                    self.download_url, proxies={"https": self.proxy_url}, timeout=3
-                )
-                resp.raise_for_status()
-                f.write(resp.content)
-        except (ConnectionError_, HTTPError, Timeout):
-            # FIXME: Do something useful
-            return
+        with open(tldr_zip, "wb") as f:
+            f.write(data)
 
         with ZipFile(tldr_zip, "r") as f:
             f.extractall(self.location_base)
@@ -81,6 +75,25 @@ class PageCache:
         for item in self.location_base.iterdir():
             if item.is_file():
                 item.unlink()
+
+
+class DownloadError(Exception):
+    def __init__(self, *args, status_code: int = 0, **kwargs):
+        self.status_code = status_code
+        super().__init__(*args, **kwargs)
+
+
+def download_data(url, proxies: dict = None, timeout: int = 3) -> bytes:
+    try:
+        resp = requests.get(url, proxies=proxies, timeout=timeout)
+        resp.raise_for_status()
+        return resp.content
+    except (ConnectionError_, HTTPError, Timeout) as exc:
+        if exc.response:
+            err = DownloadError(exc.response.status_code)
+        else:
+            err = DownloadError()
+        raise err
 
 
 class PageFinder:
@@ -117,16 +130,13 @@ class PageFinder:
         return "/".join([self.source_url, platform, name + ".md"])
 
     def _query(self, url: str) -> str:
-        proxies = {"https": self.proxy_url}
-        result = ""
         try:
-            resp = requests.get(url, proxies=proxies, timeout=3)
-            resp.raise_for_status()
-            result = resp.text
-        except (ConnectionError_, HTTPError, Timeout):
-            # FIXME: Do something useful
-            pass
-        return result
+            data = download_data(url, proxies={"https": self.proxy_url})
+        except DownloadError as exc:
+            if exc.status_code == HTTPStatus.NOT_FOUND:
+                return ""
+            raise exc
+        return data.decode(encoding="utf8")
 
     def find(self, name: str, platform: str = "") -> str:
         content = ""

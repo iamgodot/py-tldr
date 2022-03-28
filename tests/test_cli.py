@@ -2,6 +2,7 @@ import toml
 
 from py_tldr import core
 from py_tldr.core import cli
+from py_tldr.page import DownloadError
 
 
 def test_version(runner):
@@ -52,3 +53,24 @@ class TestCommand:
         assert result.exit_code == 0
         assert "tldr" in result.output
         patched_update.assert_called_once()
+
+
+class TestFailure:
+    def test_sync_fail(self, mocker, runner):
+        mocker.patch("py_tldr.page.PageFinder.sync", side_effect=DownloadError)
+        result = runner.invoke(cli, ["--update"])
+        assert result.exit_code == 1
+        print(result.output)
+        assert "failed" in result.output
+
+    def test_find_page_fail(self, mocker, runner):
+        mocker.patch("py_tldr.page.PageFinder.find", side_effect=DownloadError)
+        result = runner.invoke(cli, ["tldr"])
+        assert result.exit_code == 1
+        assert "failed" in result.output
+
+    def test_no_pages_found(self, mocker, runner):
+        mocker.patch("py_tldr.page.PageFinder.find", return_value="")
+        result = runner.invoke(cli, ["non-existed-cmd"])
+        assert result.exit_code == 1
+        assert "No result" in result.output
