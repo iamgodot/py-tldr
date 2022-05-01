@@ -17,12 +17,12 @@ class PageCache:
 
     Attributes:
         timeout: Number of hours to indicate TTL for cache data.
-          Use integer for better understanding, but could be a decimal.
+        Could be a decimal.
     """
 
     def __init__(
         self,
-        timeout: int,
+        timeout: float,
         location_base: LibPath,
         download_url: str,
         proxy_url: str = None,

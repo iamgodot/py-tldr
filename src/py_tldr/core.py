@@ -22,12 +22,13 @@ except ModuleNotFoundError:
     VERSION_CLI = get_distribution("py_tldr").version
 
 VERSION_CLIENT_SPEC = "1.5"
+DEFAULT_CACHE_HOURS = 24
 DEFAULT_CONFIG = {
     "page_source": "https://raw.githubusercontent.com/tldr-pages/tldr/master/pages",
     "language": "",
     "cache": {
         "enabled": True,
-        "timeout": 24,
+        "timeout": DEFAULT_CACHE_HOURS,
         "download_url": "https://tldr-pages.github.io/assets/tldr.zip",
     },
     "proxy_url": "",
@@ -75,7 +76,11 @@ def setup_config(ctx, param, value):  # pylint: disable=unused-argument
     if not config:
         with open(config_file, encoding="utf8") as f:
             config = toml.load(f)
-    # TODO: config validation
+
+    cache = config.get("cache")
+    if not config.get("page_source") or not cache or not cache.get("download_url"):
+        warn(f"Page source and cache are required in config file: {config_file}")
+        sys.exit(1)
     return config
 
 
@@ -155,10 +160,10 @@ def make_page_finder(config=None) -> PageFinder:
         config = DEFAULT_CONFIG
     source_url = config["page_source"]
     cache_config = config["cache"]
-    cache_timeout = cache_config["timeout"]
+    cache_timeout = cache_config.get("timeout", DEFAULT_CACHE_HOURS)
     cache_location = DEFAULT_CACHE_DIR
     cache_download_url = cache_config["download_url"]
-    cache_enabled = cache_config["enabled"]
+    cache_enabled = cache_config.get("enabled", True)
     proxy_url = config["proxy_url"]
     return PageFinder(
         source_url,
