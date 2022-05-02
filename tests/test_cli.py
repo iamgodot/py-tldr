@@ -1,8 +1,10 @@
+from os import environ
+
 import pytest
 import toml
 
 from py_tldr import core
-from py_tldr.core import cli
+from py_tldr.core import cli, get_languages
 from py_tldr.page import DownloadError
 
 
@@ -91,3 +93,26 @@ class TestFailure:
         result = runner.invoke(cli, ["non-existed-cmd"])
         assert result.exit_code == 1
         assert "No result" in result.output
+
+
+class TestGetLanguages:
+    @pytest.mark.parametrize(
+        "language, languages", (["", ["en"]], ["en", ["en"]], ["zh", ["zh"]])
+    )
+    def test_with_specified_lang(self, language, languages):
+        assert get_languages(language) == languages
+
+    @pytest.mark.parametrize(
+        "env_lang, env_language, languages",
+        (
+            ["cz", "it:cz:de", ["it", "cz", "de", "en"]],
+            ["cz", "it:de:fr", ["it", "de", "fr", "cz", "en"]],
+            ["it", "", ["it", "en"]],
+            ["", "it:cz", ["en"]],
+            ["", "", ["en"]],
+        ),
+    )
+    def test_from_env(self, env_lang, env_language, languages):
+        environ["LANG"] = env_lang
+        environ["LANGUAGE"] = env_language
+        assert get_languages("") == languages
