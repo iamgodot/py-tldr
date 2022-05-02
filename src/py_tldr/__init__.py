@@ -1,4 +1,4 @@
 from .core import cli
 from .page import PageCache, PageFinder, PageFormatter
 
-__version__ = "0.5.3"
+__version__ = "0.6.0"
