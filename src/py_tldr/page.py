@@ -46,12 +46,11 @@ class PageCache:
         return False
 
     def get(self, name: str, platform: str) -> str:
-        res = ""
-        for pf in ["common", platform]:
-            page_file = self._make_page_file(pf, name)
-            if self._validate_page_file(page_file):
-                with open(page_file, encoding="utf8") as f:
-                    res = f.read()
+        page_file = self._make_page_file(platform, name)
+        if not self._validate_page_file(page_file):
+            return ""
+        with open(page_file, encoding="utf8") as f:
+            res = f.read()
         return res
 
     def set(self, name: str, platform: str, content: str):
@@ -99,10 +98,9 @@ def download_data(url, proxies: dict = None, timeout: int = 3) -> bytes:
 class PageFinder:
     """PageFinder is to locate specific entries among tldr pages.
 
-    It tries its best to find a corresponding page answer while is
-    retricted to the given language and platform. This means it will
-    not change towards other scopes (except `common`) in order to
-    find a match.
+    A page finder tries its best to according to the given language
+    and platform. This means it will not expand such scope during
+    the match process, except `common`, see find() method below.
 
     Attributes:
         source_url: Indicate where tldr pages are located.
@@ -139,18 +137,31 @@ class PageFinder:
         return data.decode(encoding="utf8")
 
     def find(self, name: str, platform: str = "") -> str:
+        """Find named page based on given platform and language list.
+
+        Tldr merges shared entries under `common` folder, so it's added
+        as a fallback for platform.
+        For each combination of platform and language, following steps
+        will be applied to perform matching:
+
+            1. Query cache if enabled.
+            2. Query source.
+            3. If matched, set cache if enabled, then simply break.
+            4. Otherwise try next combination.
+        """
         content = ""
-        if self.cache_enabled:
-            content = self.cache.get(name, platform)
-        if not content:
-            # tldr merges shared entries under `common` folder
-            platform = "" if platform == "common" else platform
-            for pf in filter(None, ["common", platform]):
-                content = self._query(self._make_page_url(name, pf))
+        platform = platform or "common"
+        platforms = [platform, "common"] if platform != "common" else [platform]
+        for pf in platforms:
+            if self.cache_enabled:
+                content = self.cache.get(name, pf)
                 if content:
-                    if self.cache_enabled:
-                        self.cache.set(name, pf, content)
                     break
+            content = self._query(self._make_page_url(name, pf))
+            if content:
+                if self.cache_enabled:
+                    self.cache.set(name, pf, content)
+                break
         return content
 
     def sync(self) -> None:
