@@ -1,6 +1,7 @@
 from datetime import datetime
 from http import HTTPStatus
 from pathlib import Path as LibPath
+from typing import List
 from zipfile import ZipFile
 
 import requests
@@ -33,8 +34,9 @@ class PageCache:
         self.download_url = download_url
         self.proxy_url = proxy_url
 
-    def _make_page_file(self, folder: str, name: str) -> LibPath:
-        return self.location / folder / (name + ".md")
+    def _make_page_file(self, platform: str, name: str, language: str) -> LibPath:
+        postfix_lang = f".{language}" if language != "en" else ""
+        return LibPath(str(self.location) + postfix_lang) / platform / (name + ".md")
 
     def _validate_page_file(self, page_file: LibPath) -> bool:
         if page_file.exists():
@@ -45,17 +47,17 @@ class PageCache:
             return age <= self.timeout
         return False
 
-    def get(self, name: str, platform: str) -> str:
-        page_file = self._make_page_file(platform, name)
+    def get(self, name: str, platform: str, language: str = "en") -> str:
+        page_file = self._make_page_file(platform, name, language)
         if not self._validate_page_file(page_file):
             return ""
         with open(page_file, encoding="utf8") as f:
             res = f.read()
         return res
 
-    def set(self, name: str, platform: str, content: str):
+    def set(self, name: str, platform: str, content: str, language: str = "en"):
         (self.location / platform).mkdir(parents=True, exist_ok=True)
-        page_file = self._make_page_file(platform, name)
+        page_file = self._make_page_file(platform, name, language)
         with open(page_file, "w", encoding="utf8") as f:
             f.write(content)
 
@@ -124,8 +126,9 @@ class PageFinder:
             cache_timeout, cache_location, cache_download_url, proxy_url
         )
 
-    def _make_page_url(self, name: str, platform: str) -> str:
-        return "/".join([self.source_url, platform, name + ".md"])
+    def _make_page_url(self, name: str, platform: str, language: str) -> str:
+        postfix_lang = f".{language}" if language != "en" else ""
+        return "/".join([self.source_url + postfix_lang, platform, name + ".md"])
 
     def _query(self, url: str) -> str:
         try:
@@ -136,7 +139,7 @@ class PageFinder:
             raise exc
         return data.decode(encoding="utf8")
 
-    def find(self, name: str, platform: str = "") -> str:
+    def find(self, name: str, platform: str = "", languages: List[str] = None) -> str:
         """Find named page based on given platform and language list.
 
         Tldr merges shared entries under `common` folder, so it's added
@@ -152,16 +155,18 @@ class PageFinder:
         content = ""
         platform = platform or "common"
         platforms = [platform, "common"] if platform != "common" else [platform]
+        languages = languages or ["en"]
         for pf in platforms:
-            if self.cache_enabled:
-                content = self.cache.get(name, pf)
-                if content:
-                    break
-            content = self._query(self._make_page_url(name, pf))
-            if content:
+            for lang in languages:
                 if self.cache_enabled:
-                    self.cache.set(name, pf, content)
-                break
+                    content = self.cache.get(name, pf, language=lang)
+                    if content:
+                        break
+                content = self._query(self._make_page_url(name, pf, lang))
+                if content:
+                    if self.cache_enabled:
+                        self.cache.set(name, pf, content, language=lang)
+                    break
         return content
 
     def sync(self) -> None:

@@ -1,7 +1,9 @@
 import platform as platform_
 import sys
 from functools import partial
+from os import environ
 from pathlib import Path as LibPath
+from typing import List
 
 import toml
 from click import Choice, Path, argument
@@ -106,10 +108,15 @@ def setup_config(ctx, param, value):  # pylint: disable=unused-argument
     type=Choice(["android", "common", "linux", "osx", "sunos", "windows"]),
     help="Override current operating system.",
 )
+@option(
+    "-L",
+    "--language",
+    help="Specify language of the page(with no fallbacks), e.g. `en`.",
+)
 @option("-u", "--update", is_flag=True, help="Update local cache with all pages.")
 @argument("command", nargs=-1)
 @pass_context
-def cli(ctx, config, command, platform, update):
+def cli(ctx, config, command, platform, language, update):
     """Collaborative cheatsheets for console commands.
 
     For subcommands such as `git commit`, just keep as it is:
@@ -136,9 +143,12 @@ def cli(ctx, config, command, platform, update):
         command = "-".join(command)
 
     content = None
+    languages = get_languages(language)
     with yaspin(Spinners.arc, text="Searching pages...") as sp:
         try:
-            content = page_finder.find(command, platform or guess_os())
+            content = page_finder.find(
+                command, platform or guess_os(), languages=languages
+            )
         except DownloadError:
             sp.write("> Search failed, check your network and try again.")
             sys.exit(1)
@@ -173,6 +183,34 @@ def make_page_finder(config=None) -> PageFinder:
         cache_enabled,
         proxy_url,
     )
+
+
+def get_languages(language: str) -> List[str]:
+    """Return language list for page matching.
+
+    If language specified, use it with no fallbacks.
+    Otherwise make the list based on env `LANG` and
+    `LANGUAGE`.
+    # pylint: disable=line-too-long
+    For detailed logic, see https://github.com/tldr-pages/tldr/blob/master/CLIENT-SPECIFICATION.md#language  # noqa
+    """
+    if language:
+        return [language]
+
+    def extractor(x):
+        return x.split("_", maxsplit=1)[0]
+
+    lang = extractor(environ.get("LANG", ""))
+    if not lang:
+        return ["en"]
+    languages = [
+        extractor(item) for item in environ.get("LANGUAGE", "").split(":") if item
+    ]
+    if lang not in languages:
+        languages.append(lang)
+    if "en" not in languages:
+        languages.append("en")
+    return languages
 
 
 def guess_os():
