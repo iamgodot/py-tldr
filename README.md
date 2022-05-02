@@ -31,6 +31,8 @@ Options:
   --config FILE                   Specify a config file to use.
   -p, --platform [android|common|linux|osx|sunos|windows]
                                   Override current operating system.
+  -L, --language TEXT             Specify language of the page(with no
+                                  fallbacks), e.g. `en`.
   -u, --update                    Update local cache with all pages.
   -h, --help                      Show this message and exit.
 ```
@@ -50,7 +52,7 @@ download_url = "https://tldr-pages.github.io/assets/tldr.zip"
 
 Cache is enabled implicitly, with 24 hours as expiration time.
 
-A proxy url can be set for convenience, proxy envs such as HTTP_PROXY will also work.
+A proxy url can be set for convenience, proxy envs such as `HTTP_PROXY` will also work.
 
 ## Support
 
