@@ -147,12 +147,11 @@ class PageFinder:
         For each combination of platform and language, following steps
         will be applied to perform matching:
 
-            1. Query cache if enabled.
+            1. Query cache if enabled, return if result found.
             2. Query source.
-            3. If matched, set cache if enabled, then simply break.
+            3. If matched, set cache if enabled, and simply return.
             4. Otherwise try next combination.
         """
-        content = ""
         platform = platform or "common"
         platforms = [platform, "common"] if platform != "common" else [platform]
         languages = languages or ["en"]
@@ -161,13 +160,13 @@ class PageFinder:
                 if self.cache_enabled:
                     content = self.cache.get(name, pf, language=lang)
                     if content:
-                        break
+                        return content
                 content = self._query(self._make_page_url(name, pf, lang))
                 if content:
                     if self.cache_enabled:
                         self.cache.set(name, pf, content, language=lang)
-                    break
-        return content
+                    return content
+        return ""
 
     def sync(self) -> None:
         self.cache.update()
