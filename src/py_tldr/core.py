@@ -26,7 +26,7 @@ except ModuleNotFoundError:
 VERSION_CLIENT_SPEC = "1.5"
 DEFAULT_CACHE_HOURS = 24
 DEFAULT_CONFIG = {
-    "page_source": "https://raw.githubusercontent.com/tldr-pages/tldr/master/pages",
+    "page_source": "https://raw.githubusercontent.com/tldr-pages/tldr/main/pages",
     "language": "",
     "cache": {
         "enabled": True,
@@ -192,7 +192,7 @@ def get_languages(language: str) -> List[str]:
     Otherwise make the list based on env `LANG` and
     `LANGUAGE`.
     # pylint: disable=line-too-long
-    For detailed logic, see https://github.com/tldr-pages/tldr/blob/master/CLIENT-SPECIFICATION.md#language  # noqa
+    For detailed logic, see https://github.com/tldr-pages/tldr/blob/main/CLIENT-SPECIFICATION.md#language  # noqa
     """
     if language:
         return [language]
