@@ -40,7 +40,7 @@ Options:
 By default a config file will be generated in `~/.config/tldr`:
 
 ```toml
-page_source = "https://raw.githubusercontent.com/tldr-pages/tldr/master/pages"
+page_source = "https://raw.githubusercontent.com/tldr-pages/tldr/main/pages"
 language = "en"
 proxy_url = ""
 
