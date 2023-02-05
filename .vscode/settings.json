@@ -1,0 +1,11 @@
+{
+    "python.autoComplete.extraPaths": ["__pypackages__/<major.minor>/lib"],
+    "python.analysis.extraPaths": [
+        "__pypackages__/<major.minor>/lib"
+    ],
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}
