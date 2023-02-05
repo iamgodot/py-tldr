@@ -1,6 +1,0 @@
--r prod.txt
-
-pytest
-pytest-mock
-pytest-cov
-flake8

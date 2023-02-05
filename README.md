@@ -56,7 +56,7 @@ A proxy url can be set for convenience, proxy envs such as `HTTP_PROXY` will als
 
 ## Support
 
-Python: 3.6, 3.7, 3.8, 3.9
+Python: 3.7, 3.8, 3.9
 
 OS: Not fully tested on Windows so there's uncertainty with color rendering.
 

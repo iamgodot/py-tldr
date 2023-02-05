@@ -102,3 +102,9 @@ ENV/
 
 # pipenv
 Pipfile
+
+# pdm
+.pdm.toml
+__pypackages__/
+
+.vscode/

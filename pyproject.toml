@@ -1,9 +1,72 @@
-[build-system]
-requires = [
-    "setuptools>=47",
-    "wheel"
+[tool.pdm]
+[tool.pdm.dev-dependencies]
+dev = [
+    "pytest>=7.2.1",
+    "pytest-mock>=3.10.0",
+    "pytest-cov>=4.0.0",
+    "flake8>=5.0.4",
+    "tox>=3.28.0",
 ]
-build-backend = "setuptools.build_meta"
+
+[project]
+name = "py-tldr"
+description = "New Python client for tldr pages"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "iamgodot", email = "xugodot@gmail.com"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "click==8.0.3",
+    "toml==0.10.2",
+    "requests==2.26.0",
+    "yaspin==2.1.0",
+]
+dynamic = ["version"]
+
+[project.urls]
+"Issue Tracker" = "https://github.com/iamgodot/py-tldr/issues"
+
+[project.scripts]
+tldr = "py_tldr:cli"
+
+[build-system]
+requires = ["pdm-pep517>=1.0"]
+build-backend = "pdm.pep517.api"
+
+[tool.setuptools.dynamic]
+version = {attr = "py_tldr.__version__"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["py_tldr", "tests"]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py{37,38,39}
+isolated_build = True
+[testenv]
+passenv = PYTHONPATH
+deps = pdm
+commands = 
+    pdm install --dev
+    make clean
+	  pdm run flake8 --format=pylint --count
+    pdm run pytest -v --cov={envsitepackagesdir}/py_tldr tests/unit
+allowlist_externals = make
+"""
 
 [tool.tbump]
 github_url = "https://github.com/iamgodot/py-tldr"
