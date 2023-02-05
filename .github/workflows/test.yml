@@ -19,6 +19,6 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ${{ env.GITHUB_WORKSPACE }}/.tox/py
-          key: ${{ runner.os }}-tox-${{ hashFiles('requirements/prod.txt') }}
+          key: ${{ runner.os }}-tox-${{ hashFiles('pdm.lock') }}
       - run: pip install tox
       - run: tox -e py
