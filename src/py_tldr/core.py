@@ -1,6 +1,7 @@
 import platform as platform_
 import sys
 from functools import partial
+from importlib.metadata import version
 from os import environ
 from pathlib import Path as LibPath
 from typing import List
@@ -14,15 +15,7 @@ from yaspin.spinners import Spinners
 
 from .page import DownloadError, PageFinder, PageFormatter
 
-try:
-    from importlib.metadata import version
-
-    VERSION_CLI = version("py_tldr")
-except ModuleNotFoundError:
-    from pkg_resources import get_distribution
-
-    VERSION_CLI = get_distribution("py_tldr").version
-
+VERSION_CLI = version("py_tldr")
 VERSION_CLIENT_SPEC = "1.5"
 DEFAULT_CACHE_HOURS = 24
 DEFAULT_CONFIG = {
