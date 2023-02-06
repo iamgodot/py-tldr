@@ -72,7 +72,7 @@ allowlist_externals = make
 github_url = "https://github.com/iamgodot/py-tldr"
 
 [tool.tbump.version]
-current = "0.6.3"
+current = "0.6.4"
 
 regex = '''
   (?P<major>\d+)
