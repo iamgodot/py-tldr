@@ -39,8 +39,8 @@ dynamic = ["version"]
 tldr = "py_tldr:cli"
 
 [build-system]
-requires = ["pdm-pep517>=1.0"]
-build-backend = "pdm.pep517.api"
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools.dynamic]
 version = {attr = "py_tldr.__version__"}
