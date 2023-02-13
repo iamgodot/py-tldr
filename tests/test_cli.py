@@ -16,43 +16,28 @@ def test_version(runner):
 
 
 class TestConfig:
-    def test_initialize_default_config_file(self, tmp_path, mocker, runner):
-        tmp_file = tmp_path / "config.toml"
-        mocker.patch.object(core, "DEFAULT_CONFIG_DIR", tmp_path)
-        mocker.patch.object(core, "DEFAULT_CONFIG_FILE", tmp_file)
-
-        result = runner.invoke(cli, [])
-        assert result.exit_code == 0
-        assert tmp_file.exists()
-        with open(tmp_file, encoding="utf8") as f:
-            config = toml.load(f)
-            assert config == core.DEFAULT_CONFIG
-
     def _make_config_file(self, path, config):
-        config_file = path / "config.toml"
-        with open(config_file, "w", encoding="utf8") as f:
+        with open(path, "w", encoding="utf8") as f:
             toml.dump(config, f)
-        return config_file
-
-    def _make_ctx(self, mocker):
-        ctx = mocker.Mock(spec=["resilient_parsing"])
-        ctx.resilient_parsing = False
-        return ctx
 
     def test_use_custom_config_file(self, tmp_path, mocker):
-        config = {"page_source": "foo", "cache": {"download_url": "bar"}}
-        config_file = self._make_config_file(tmp_path, config)
-        ctx = self._make_ctx(mocker)
-        assert core.setup_config(ctx, None, config_file) == config
+        config_customed = {"page_source": "foo", "cache": {"download_url": "bar"}}
+        config_file = tmp_path / "config.toml"
+        self._make_config_file(config_file, config_customed)
+        mocker.patch.object(core, "DEFAULT_CONFIG_FILE", config_file)
+        config = core.setup_config()
+        assert config["page_source"] == config_customed["page_source"]
+        assert config["cache"] == config_customed["cache"]
 
     @pytest.mark.parametrize(
-        "config", ({}, {"page_source": "foo"}, {"page_source": "foo", "cache": {}})
+        "config", ({"page_source": ""}, {"cache": ""}, {"cache": {"enabled": True}})
     )
     def test_config_validation(self, tmp_path, mocker, config):
-        config_file = self._make_config_file(tmp_path, config)
-        ctx = self._make_ctx(mocker)
+        config_file = tmp_path / "config.toml"
+        self._make_config_file(config_file, config)
+        mocker.patch.object(core, "DEFAULT_CONFIG_FILE", config_file)
         with pytest.raises(SystemExit):
-            core.setup_config(ctx, None, config_file)
+            core.setup_config()
 
 
 class TestCommand:
