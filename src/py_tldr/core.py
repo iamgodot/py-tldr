@@ -6,9 +6,9 @@ from pathlib import Path as LibPath
 from typing import List
 
 import toml
-from click import Choice, Path, argument
+from click import Choice, argument
 from click import command as command_
-from click import get_app_dir, option, pass_context, secho
+from click import option, pass_context, secho
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
@@ -35,8 +35,7 @@ DEFAULT_CONFIG = {
     },
     "proxy_url": "",
 }
-DEFAULT_CONFIG_DIR = LibPath(get_app_dir("tldr"))
-DEFAULT_CONFIG_FILE = DEFAULT_CONFIG_DIR / "config.toml"
+DEFAULT_CONFIG_FILE = LibPath.home() / ".config/tldr/config.toml"
 DEFAULT_CACHE_DIR = LibPath.home() / ".cache" / "tldr"
 
 info = partial(secho, bold=True, fg="green")
@@ -51,34 +50,19 @@ def print_version(ctx, param, value):  # pylint: disable=unused-argument
     ctx.exit()
 
 
-def setup_config(ctx, param, value):  # pylint: disable=unused-argument
-    """Build a config dict from either default or custom path.
+def setup_config():  # pylint: disable=unused-argument
+    """Build a config dict from config file on top of default settings.
 
-    Currently custom config file is used without validation, so
-    misconfiguration may cause errors. Also note `toml` should
-    used as file format.
+    Note `toml` should used as file format.
+    Raises:
+      SystemExit: if merged config checking failed.
     """
-    config = {}
-
-    if not value or ctx.resilient_parsing:
-        config_dir = DEFAULT_CONFIG_DIR
-        config_file = DEFAULT_CONFIG_FILE
-
-        if not config_file.exists():
-            warn("No config file found, setting it up...")
-            config_dir.mkdir(parents=True, exist_ok=True)
-            with open(config_file, "w", encoding="utf8") as f:
-                toml.dump(DEFAULT_CONFIG, f)
-            warn(f"Config file created: {config_file}")
-            config = DEFAULT_CONFIG
-    else:
-        config_file = value
-        warn(f"Using config file from {config_file}")
-
-    if not config:
+    config = DEFAULT_CONFIG
+    config_file = DEFAULT_CONFIG_FILE
+    if config_file.exists():
+        warn(f"Found config file: {config_file}")
         with open(config_file, encoding="utf8") as f:
-            config = toml.load(f)
-
+            config.update(toml.load(f))
     cache = config.get("cache")
     if not config.get("page_source") or not cache or not cache.get("download_url"):
         warn(f"Page source and cache are required in config file: {config_file}")
@@ -97,12 +81,6 @@ def setup_config(ctx, param, value):  # pylint: disable=unused-argument
     help="Show version info and exit.",
 )
 @option(
-    "--config",
-    type=Path(exists=True, dir_okay=False, path_type=LibPath),
-    callback=setup_config,
-    help="Specify a config file to use.",
-)
-@option(
     "-p",
     "--platform",
     type=Choice(["android", "common", "linux", "osx", "sunos", "windows"]),
@@ -116,13 +94,14 @@ def setup_config(ctx, param, value):  # pylint: disable=unused-argument
 @option("-u", "--update", is_flag=True, help="Update local cache with all pages.")
 @argument("command", nargs=-1)
 @pass_context
-def cli(ctx, config, command, platform, language, update):
+def cli(ctx, command, platform, language, update):
     """Collaborative cheatsheets for console commands.
 
     For subcommands such as `git commit`, just keep as it is:
 
         tldr git commit
     """
+    config = setup_config()
     page_finder = make_page_finder(config)
 
     if update:
