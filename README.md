@@ -28,7 +28,6 @@ Usage: tldr [OPTIONS] [COMMAND]...
 
 Options:
   -v, --version                   Show version info and exit.
-  --config FILE                   Specify a config file to use.
   -p, --platform [android|common|linux|osx|sunos|windows]
                                   Override current operating system.
   -L, --language TEXT             Specify language of the page(with no
@@ -37,7 +36,7 @@ Options:
   -h, --help                      Show this message and exit.
 ```
 
-By default a config file will be generated in `~/.config/tldr`:
+A config file should be created as `~/.config/tldr/config.toml`:
 
 ```toml
 page_source = "https://raw.githubusercontent.com/tldr-pages/tldr/main/pages"
@@ -50,7 +49,7 @@ timeout = 24
 download_url = "https://tldr-pages.github.io/assets/tldr.zip"
 ```
 
-Cache is enabled implicitly, with 24 hours as expiration time.
+Cache is enabled implicitly, with 24 hours as expiration time by default.
 
 A proxy url can be set for convenience, proxy envs such as `HTTP_PROXY` will also work.
 
@@ -58,7 +57,7 @@ A proxy url can be set for convenience, proxy envs such as `HTTP_PROXY` will als
 
 Python: 3.7, 3.8, 3.9
 
-OS: Not fully tested on Windows so there's uncertainty with color rendering.
+OS: Not tested on Windows.
 
 ## Changelog
 
