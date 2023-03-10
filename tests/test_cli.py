@@ -4,7 +4,7 @@ import pytest
 import toml
 
 from py_tldr import core
-from py_tldr.core import cli, get_languages
+from py_tldr.core import DEFAULT_CONFIG_EDITOR, DEFAULT_CONFIG_FILE, cli, get_languages
 from py_tldr.page import DownloadError
 
 
@@ -38,6 +38,29 @@ class TestConfig:
         mocker.patch.object(core, "DEFAULT_CONFIG_FILE", config_file)
         with pytest.raises(SystemExit):
             core.setup_config()
+
+
+class TestEditConfig:
+    def test_create_default_config(self, tmp_path, mocker, runner):
+        config_file = tmp_path / "config.toml"
+        assert not config_file.exists()
+        mocker.patch.object(core, "DEFAULT_CONFIG_FILE", config_file)
+        runner.invoke(cli, ["tldr", "--edit-config"])
+        assert config_file.exists()
+
+    def test_default_open_editor(self, mocker, runner):
+        patched_subprocess_call = mocker.patch("py_tldr.core.subprocess.call")
+        environ.pop("EDITOR")
+        runner.invoke(cli, ["tldr", "--edit-config"])
+        patched_subprocess_call.assert_called_with(
+            [DEFAULT_CONFIG_EDITOR, DEFAULT_CONFIG_FILE]
+        )
+
+    def test_respect_editor_env(self, mocker, runner):
+        patched_subprocess_call = mocker.patch("py_tldr.core.subprocess.call")
+        environ["EDITOR"] = editor = "vim"
+        runner.invoke(cli, ["tldr", "--edit-config"])
+        patched_subprocess_call.assert_called_with([editor, DEFAULT_CONFIG_FILE])
 
 
 class TestCommand:
