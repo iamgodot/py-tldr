@@ -28,6 +28,7 @@ Usage: tldr [OPTIONS] [COMMAND]...
 
 Options:
   -v, --version                   Show version info and exit.
+  --edit-config                   Open config file with an editor.
   -p, --platform [android|common|linux|osx|sunos|windows]
                                   Override current operating system.
   -L, --language TEXT             Specify language of the page(with no
@@ -36,7 +37,7 @@ Options:
   -h, --help                      Show this message and exit.
 ```
 
-A config file should be created as `~/.config/tldr/config.toml`:
+Config file should be located as `~/.config/tldr/config.toml`, you can use `--edit-config` to create a default one, which will contain the following content:
 
 ```toml
 page_source = "https://raw.githubusercontent.com/tldr-pages/tldr/main/pages"
