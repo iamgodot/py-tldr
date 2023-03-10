@@ -1,4 +1,5 @@
 import platform as platform_
+import subprocess
 import sys
 from functools import partial
 from os import environ
@@ -35,6 +36,7 @@ DEFAULT_CONFIG = {
     },
     "proxy_url": "",
 }
+DEFAULT_CONFIG_EDITOR = "vi"
 DEFAULT_CONFIG_FILE = LibPath.home() / ".config/tldr/config.toml"
 DEFAULT_CACHE_DIR = LibPath.home() / ".cache" / "tldr"
 
@@ -47,6 +49,22 @@ def print_version(ctx, param, value):  # pylint: disable=unused-argument
         return
     info(f"tldr version {VERSION_CLI}")
     info(f"client specification version {VERSION_CLIENT_SPEC}")
+    ctx.exit()
+
+
+def edit_config(ctx, param, value):  # pylint: disable=unused-argument
+    """Create config file if not existed, then open in editor."""
+    if not value or ctx.resilient_parsing:
+        return
+    config = DEFAULT_CONFIG
+    config_file = DEFAULT_CONFIG_FILE
+    if not config_file.exists():
+        warn("No config file found, creating...")
+        with open(config_file, "w", encoding="utf8") as f:
+            toml.dump(config, f)
+        info(f"Default config file created: {config_file}")
+    editor = environ.get("EDITOR", DEFAULT_CONFIG_EDITOR)
+    subprocess.call([editor, config_file])
     ctx.exit()
 
 
@@ -79,6 +97,14 @@ def setup_config():  # pylint: disable=unused-argument
     is_eager=True,
     expose_value=False,
     help="Show version info and exit.",
+)
+@option(
+    "--edit-config",
+    is_flag=True,
+    callback=edit_config,
+    is_eager=True,
+    expose_value=False,
+    help="Open config file with an editor.",
 )
 @option(
     "-p",
