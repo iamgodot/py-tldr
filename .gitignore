@@ -104,7 +104,7 @@ ENV/
 Pipfile
 
 # pdm
-.pdm.toml
+.pdm-python
 __pypackages__/
 
 .vscode/
