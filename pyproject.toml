@@ -4,8 +4,9 @@ dev = [
     "pytest>=7.2.1",
     "pytest-mock>=3.10.0",
     "pytest-cov>=4.0.0",
-    "flake8>=5.0.4",
     "tox>=3.28.0",
+    "black",
+    "ruff",
 ]
 
 [project]
@@ -52,6 +53,19 @@ testpaths = ["tests"]
 branch = true
 source = ["py_tldr", "tests"]
 
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+
+[tool.ruff]
+exclude = [".git", ".tox", "venv", "build", "__pypackages__"]
+line-length = 88
+per-file-ignores = {"src/py_tldr/__init__.py" = ["F401"]}
+src = ["src", "tests"]
+
+[tool.ruff.isort]
+known-first-party = ["py_tldr"]
+
 [tool.tox]
 legacy_tox_ini = """
 [tox]
@@ -60,10 +74,10 @@ isolated_build = True
 [testenv]
 passenv = PYTHONPATH
 deps = pdm
-commands = 
-    pdm install --dev
+commands =
+    make install
     make clean
-	  pdm run flake8 --format=pylint --count
+    make lint
     pdm run pytest -v --cov={envsitepackagesdir}/py_tldr tests/unit
 allowlist_externals = make
 """
