@@ -197,8 +197,8 @@ def get_languages(language: str) -> List[str]:
     Otherwise make the list based on env `LANG` and
     `LANGUAGE`.
     # pylint: disable=line-too-long
-    For detailed logic, see https://github.com/tldr-pages/tldr/blob/main/CLIENT-SPECIFICATION.md#language  # noqa
-    """
+    For detailed logic, see https://github.com/tldr-pages/tldr/blob/main/CLIENT-SPECIFICATION.md#language
+    """  # noqa: E501
     if language:
         return [language]
 
