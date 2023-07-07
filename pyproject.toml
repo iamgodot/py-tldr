@@ -1,3 +1,6 @@
+[tool.pyright]
+extraPaths = ["__pypackages__/3.11/lib/"]
+
 [tool.pdm]
 [tool.pdm.dev-dependencies]
 dev = [
