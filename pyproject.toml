@@ -7,7 +7,6 @@ dev = [
     "pytest>=7.2.1",
     "pytest-mock>=3.10.0",
     "pytest-cov>=4.0.0",
-    "tox>=3.28.0",
     "black",
     "ruff",
 ]
@@ -69,22 +68,6 @@ src = ["src", "tests"]
 
 [tool.ruff.isort]
 known-first-party = ["py_tldr"]
-
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-envlist = py{37,38,39}
-isolated_build = True
-[testenv]
-passenv = PYTHONPATH
-deps = pdm
-commands =
-    make install
-    make clean
-    make lint
-    pdm run pytest -v --cov={envsitepackagesdir}/py_tldr tests/unit
-allowlist_externals = make
-"""
 
 [tool.tbump]
 github_url = "https://github.com/iamgodot/py-tldr"
