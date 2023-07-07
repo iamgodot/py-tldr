@@ -7,9 +7,8 @@ from pathlib import Path as LibPath
 from typing import List
 
 import toml
-from click import Choice, argument
+from click import Choice, argument, option, pass_context, secho
 from click import command as command_
-from click import option, pass_context, secho
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
