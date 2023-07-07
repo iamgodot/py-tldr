@@ -1,29 +1,22 @@
-.PHONY: help install clean lint format test
+help: ## Prints help for targets with comments
+	@cat $(MAKEFILE_LIST) | grep -E '^[a-zA-Z_-]+:.*?## .*$$' | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-help:
-	@echo "This Makefile supports following rules:"
-	@echo "  install: install prod&dev dependencies by PDM."
-	@echo "  clean: remove python cache&build results."
-	@echo "  lint: check linting by ruff."
-	@echo "  format: format code by black&ruff."
-	@echo "  test: clean first, then check lint and test."
-
-install:
+install: # Install prod&dev dependencies via pdm.
 	pdm install --dev
 
-clean:
+clean: # Remove python cache&build results.
 	find . -iname "*__pycache__" | xargs rm -rf
 	find . -iname "*.pyc" | xargs rm -rf
 	rm -rf .pytest_cache
 	rm -rf build
 	rm -rf dist
 
-lint:
-	ruff check .
+lint: # Check linting via ruff.
+	pdm run ruff check .
 
-format:
-	black .
-	ruff check --fix .
+format: # Format code via black&ruff.
+	pdm run black .
+	pdm run ruff check --fix .
 
-test: clean lint
-	pytest -v --cov=src/py_tldr tests
+test: clean lint # Clean, check lint and run tests.
+	pdm run pytest -v --cov=src/py_tldr tests
