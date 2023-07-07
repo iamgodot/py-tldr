@@ -61,6 +61,7 @@ line-length = 88
 include = '\.pyi?$'
 
 [tool.ruff]
+select = ["E", "F", "I"]
 exclude = [".git", ".tox", "venv", "build", "__pypackages__"]
 line-length = 88
 per-file-ignores = {"src/py_tldr/__init__.py" = ["F401"]}
