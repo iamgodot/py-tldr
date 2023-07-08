@@ -19,9 +19,12 @@ try:
 
     VERSION_CLI = version("py_tldr")
 except ModuleNotFoundError:
-    from pkg_resources import get_distribution
+    try:
+        from pkg_resources import get_distribution
 
-    VERSION_CLI = get_distribution("py_tldr").version
+        VERSION_CLI = get_distribution("py_tldr").version
+    except ModuleNotFoundError:
+        VERSION_CLI = ""
 
 VERSION_CLIENT_SPEC = "1.5"
 DEFAULT_CACHE_HOURS = 24
