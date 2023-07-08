@@ -1,5 +1,4 @@
 name: test
-
 on:
   push:
     branches:
@@ -13,24 +12,22 @@ on:
     paths-ignore:
       - 'docs/**'
       - '*.md'
-
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
+        # TODO: this action supports cache already
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/cache@v3
-        with:
-          path: ${{ env.GITHUB_WORKSPACE }}/.tox/py
-          key: ${{ runner.os }}-tox-${{ hashFiles('pdm.lock') }}
-      - run: pip install tox
-      - run: tox -e py
+      - name: Install dependencies
+        run: |
+          pip install pdm
+          make install
+      - name: Run tests
+        run: make test

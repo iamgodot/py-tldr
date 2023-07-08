@@ -50,7 +50,7 @@ class TestEditConfig:
 
     def test_default_open_editor(self, mocker, runner):
         patched_subprocess_call = mocker.patch("py_tldr.core.subprocess.call")
-        environ.pop("EDITOR")
+        environ.pop("EDITOR", None)
         runner.invoke(cli, ["tldr", "--edit-config"])
         patched_subprocess_call.assert_called_with(
             [DEFAULT_CONFIG_EDITOR, DEFAULT_CONFIG_FILE]

@@ -7,9 +7,8 @@ from pathlib import Path as LibPath
 from typing import List
 
 import toml
-from click import Choice, argument
+from click import Choice, argument, option, pass_context, secho
 from click import command as command_
-from click import option, pass_context, secho
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
@@ -20,9 +19,12 @@ try:
 
     VERSION_CLI = version("py_tldr")
 except ModuleNotFoundError:
-    from pkg_resources import get_distribution
+    try:
+        from pkg_resources import get_distribution
 
-    VERSION_CLI = get_distribution("py_tldr").version
+        VERSION_CLI = get_distribution("py_tldr").version
+    except ModuleNotFoundError:
+        VERSION_CLI = ""
 
 VERSION_CLIENT_SPEC = "1.5"
 DEFAULT_CACHE_HOURS = 24
