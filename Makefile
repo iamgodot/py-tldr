@@ -19,4 +19,4 @@ format: # Format code via black&ruff.
 	pdm run ruff check --fix .
 
 test: clean lint # Clean, check lint and run tests.
-	pdm run pytest -v --cov=src/py_tldr tests/unit
+	pdm run pytest -v --cov=src/py_tldr tests
