@@ -45,7 +45,10 @@ class TestEditConfig:
         config_file = tmp_path / "config.toml"
         assert not config_file.exists()
         mocker.patch.object(core, "DEFAULT_CONFIG_FILE", config_file)
-        runner.invoke(cli, ["tldr", "--edit-config"])
+        # NOTE: in case of no editor installed
+        mocker.patch("py_tldr.core.subprocess.call")
+        result = runner.invoke(cli, ["--edit-config"])
+        assert result.exit_code == 0
         assert config_file.exists()
 
     def test_default_open_editor(self, mocker, runner):
