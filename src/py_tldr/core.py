@@ -1,6 +1,7 @@
 import platform as platform_
 import subprocess
 import sys
+from copy import deepcopy
 from functools import partial
 from os import environ
 from pathlib import Path as LibPath
@@ -77,7 +78,7 @@ def setup_config():  # pylint: disable=unused-argument
     Raises:
       SystemExit: if merged config checking failed.
     """
-    config = DEFAULT_CONFIG
+    config = deepcopy(DEFAULT_CONFIG)
     config_file = DEFAULT_CONFIG_FILE
     if config_file.exists():
         warn(f"Found config file: {config_file}")
