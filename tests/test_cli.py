@@ -54,7 +54,7 @@ class TestEditConfig:
     def test_default_open_editor(self, mocker, runner):
         patched_subprocess_call = mocker.patch("py_tldr.core.subprocess.call")
         environ.pop("EDITOR", None)
-        runner.invoke(cli, ["tldr", "--edit-config"])
+        runner.invoke(cli, ["--edit-config"])
         patched_subprocess_call.assert_called_with(
             [DEFAULT_CONFIG_EDITOR, DEFAULT_CONFIG_FILE]
         )
@@ -62,7 +62,7 @@ class TestEditConfig:
     def test_respect_editor_env(self, mocker, runner):
         patched_subprocess_call = mocker.patch("py_tldr.core.subprocess.call")
         environ["EDITOR"] = editor = "vim"
-        runner.invoke(cli, ["tldr", "--edit-config"])
+        runner.invoke(cli, ["--edit-config"])
         patched_subprocess_call.assert_called_with([editor, DEFAULT_CONFIG_FILE])
 
 

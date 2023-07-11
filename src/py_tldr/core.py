@@ -40,7 +40,8 @@ DEFAULT_CONFIG = {
     "proxy_url": "",
 }
 DEFAULT_CONFIG_EDITOR = "vi"
-DEFAULT_CONFIG_FILE = LibPath.home() / ".config/tldr/config.toml"
+DEFAULT_CONFIG_DIR = LibPath.home() / ".config/tldr"
+DEFAULT_CONFIG_FILE = DEFAULT_CONFIG_DIR / "config.toml"
 DEFAULT_CACHE_DIR = LibPath.home() / ".cache" / "tldr"
 
 info = partial(secho, bold=True, fg="green")
@@ -63,6 +64,7 @@ def edit_config(ctx, param, value):  # pylint: disable=unused-argument
     config_file = DEFAULT_CONFIG_FILE
     if not config_file.exists():
         warn("No config file found, creating...")
+        DEFAULT_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
         with open(config_file, "w", encoding="utf8") as f:
             toml.dump(config, f)
         info(f"Default config file created: {config_file}")
