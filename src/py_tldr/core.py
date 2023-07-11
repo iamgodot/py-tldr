@@ -14,6 +14,7 @@ from yaspin import yaspin
 from yaspin.spinners import Spinners
 
 from .page import DownloadError, PageFinder, PageFormatter
+from .parse import parse_command
 
 try:
     from importlib.metadata import version
@@ -149,8 +150,8 @@ def cli(ctx, command, platform, language, update):
         if not update:
             secho(ctx.get_help())
         return
-    else:
-        command = "-".join(command)
+
+    command = parse_command(command)
 
     content = None
     languages = get_languages(language)
