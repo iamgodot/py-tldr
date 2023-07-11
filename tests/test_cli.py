@@ -45,13 +45,16 @@ class TestEditConfig:
         config_file = tmp_path / "config.toml"
         assert not config_file.exists()
         mocker.patch.object(core, "DEFAULT_CONFIG_FILE", config_file)
-        runner.invoke(cli, ["tldr", "--edit-config"])
+        # NOTE: in case of no editor installed
+        mocker.patch("py_tldr.core.subprocess.call")
+        result = runner.invoke(cli, ["--edit-config"])
+        assert result.exit_code == 0
         assert config_file.exists()
 
     def test_default_open_editor(self, mocker, runner):
         patched_subprocess_call = mocker.patch("py_tldr.core.subprocess.call")
         environ.pop("EDITOR", None)
-        runner.invoke(cli, ["tldr", "--edit-config"])
+        runner.invoke(cli, ["--edit-config"])
         patched_subprocess_call.assert_called_with(
             [DEFAULT_CONFIG_EDITOR, DEFAULT_CONFIG_FILE]
         )
@@ -59,7 +62,7 @@ class TestEditConfig:
     def test_respect_editor_env(self, mocker, runner):
         patched_subprocess_call = mocker.patch("py_tldr.core.subprocess.call")
         environ["EDITOR"] = editor = "vim"
-        runner.invoke(cli, ["tldr", "--edit-config"])
+        runner.invoke(cli, ["--edit-config"])
         patched_subprocess_call.assert_called_with([editor, DEFAULT_CONFIG_FILE])
 
 

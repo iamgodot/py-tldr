@@ -1,7 +1,7 @@
 # Py-tldr
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![test](https://github.com/iamgodot/py-tldr/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/iamgodot/py-tldr/actions/workflows/test.yml)
+[![test](https://github.com/iamgodot/py-tldr/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/iamgodot/py-tldr/actions/workflows/test.yml)
 
 Py-tldr is a new Python client for [tldr pages](https://github.com/tldr-pages/tldr) based on [Click](https://github.com/pallets/click).
 
