@@ -21,13 +21,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        # TODO: this action supports cache already
-        uses: actions/setup-python@v4
+        uses: pdm-project/setup-pdm@v3
         with:
           python-version: ${{ matrix.python-version }}
+          cache: true
       - name: Install dependencies
         run: |
-          pip install pdm
           make install
       - name: Run tests
         run: make test
