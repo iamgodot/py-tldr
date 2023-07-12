@@ -152,7 +152,7 @@ def cli(ctx, command, platform, language, update):
         return
 
     command = parse_command(command)
-    languages = parse_language(language)
+    languages = parse_language(language, config)
     platform = parse_platform(platform)
     content = None
     with yaspin(Spinners.arc, text="Searching pages...") as sp:

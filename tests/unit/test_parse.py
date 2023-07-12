@@ -22,7 +22,7 @@ def test_parse_command(command, parsed):
 
 
 @pytest.mark.parametrize(
-    "language, env_lang, env_language, parsed",
+    "language, config, env_lang, env_language, parsed",
     (
         ["zh", {}, "", "", ["zh"]],
         ["", {"language": "zh"}, "", "", ["zh"]],
@@ -36,7 +36,7 @@ def test_parse_command(command, parsed):
         ["", {}, "Cz", "IT:cz:DE", ["it", "cz", "de", "en"]],
     ),
 )
-def test_parse_language(language, env_lang, env_language, parsed):
+def test_parse_language(language, config, env_lang, env_language, parsed):
     environ["LANG"] = env_lang
     environ["LANGUAGE"] = env_language
     assert parse_language(language, config) == parsed
