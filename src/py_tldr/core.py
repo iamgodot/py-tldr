@@ -1,11 +1,9 @@
-import platform as platform_
 import subprocess
 import sys
 from copy import deepcopy
 from functools import partial
 from os import environ
 from pathlib import Path as LibPath
-from typing import List
 
 import toml
 from click import Choice, argument, option, pass_context, secho
@@ -14,7 +12,7 @@ from yaspin import yaspin
 from yaspin.spinners import Spinners
 
 from .page import DownloadError, PageFinder, PageFormatter
-from .parse import parse_command
+from .parse import parse_command, parse_language, parse_platform
 
 try:
     from importlib.metadata import version
@@ -115,13 +113,15 @@ def setup_config():  # pylint: disable=unused-argument
 @option(
     "-p",
     "--platform",
-    type=Choice(["android", "common", "linux", "osx", "sunos", "windows"]),
-    help="Override current operating system.",
+    type=Choice(["android", "linux", "macos", "osx", "sunos", "windows"]),
+    default="linux",
+    help="Specify searching platform(macos as an alias of osx).",
 )
 @option(
     "-L",
     "--language",
-    help="Specify language of the page(with no fallbacks), e.g. `en`.",
+    default="en",
+    help="Specify searching language(with no fallbacks), e.g. `en`.",
 )
 @option("-u", "--update", is_flag=True, help="Update local cache with all pages.")
 @argument("command", nargs=-1)
@@ -152,14 +152,12 @@ def cli(ctx, command, platform, language, update):
         return
 
     command = parse_command(command)
-
+    languages = parse_language(language)
+    platform = parse_platform(platform)
     content = None
-    languages = get_languages(language)
     with yaspin(Spinners.arc, text="Searching pages...") as sp:
         try:
-            content = page_finder.find(
-                command, platform or guess_os(), languages=languages
-            )
+            content = page_finder.find(command, platform, languages=languages)
         except DownloadError:
             sp.write("> Search failed, check your network and try again.")
             sys.exit(1)
@@ -194,41 +192,3 @@ def make_page_finder(config=None) -> PageFinder:
         cache_enabled,
         proxy_url,
     )
-
-
-def get_languages(language: str) -> List[str]:
-    """Return language list for page matching.
-
-    If language specified, use it with no fallbacks.
-    Otherwise make the list based on env `LANG` and
-    `LANGUAGE`.
-    # pylint: disable=line-too-long
-    For detailed logic, see https://github.com/tldr-pages/tldr/blob/main/CLIENT-SPECIFICATION.md#language
-    """  # noqa: E501
-    if language:
-        return [language]
-
-    def extractor(x):
-        return x.split("_", maxsplit=1)[0]
-
-    lang = extractor(environ.get("LANG", ""))
-    if not lang:
-        return ["en"]
-    languages = [
-        extractor(item) for item in environ.get("LANGUAGE", "").split(":") if item
-    ]
-    if lang not in languages:
-        languages.append(lang)
-    if "en" not in languages:
-        languages.append("en")
-    return languages
-
-
-def guess_os():
-    system_to_platform = {
-        "Linux": "linux",
-        "Darwin": "osx",
-        "Java": "sunos",
-        "Windows": "windows",
-    }
-    return system_to_platform.get(platform_.system(), "linux")
