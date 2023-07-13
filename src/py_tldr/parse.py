@@ -45,5 +45,6 @@ def guess_os():
         "Darwin": "osx",
         "Java": "sunos",
         "Windows": "windows",
+        "Android": "android",
     }
     return system_to_platform.get(platform_.system(), "linux")
