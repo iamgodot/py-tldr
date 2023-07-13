@@ -36,7 +36,8 @@ def parse_language(language: str, config: Dict) -> List[str]:
 
 
 def parse_platform(platform: str) -> str:
-    return platform.lower() or guess_os()
+    platform = platform.lower() or guess_os()
+    return "osx" if platform == "macos" else platform
 
 
 def guess_os():

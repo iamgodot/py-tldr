@@ -44,7 +44,11 @@ def test_parse_language(language, config, env_lang, env_language, parsed):
 
 @pytest.mark.parametrize(
     "platform, parsed",
-    (["OSX", "osx"],),
+    (
+        ["OSX", "osx"],
+        ["macos", "osx"],
+        ["macOS", "osx"],
+    ),
 )
 def test_parse_platform(platform, parsed):
     assert parse_platform(platform) == parsed
