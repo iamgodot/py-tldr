@@ -19,15 +19,13 @@ def parse_language(language: str, config: Dict) -> List[str]:
     if language:
         return [language.lower()]
 
-    def extractor(x: str) -> str:
+    def extract(x: str) -> str:
         return x.split("_", maxsplit=1)[0].lower()
 
-    lang = extractor(environ.get("LANG", ""))
+    lang = extract(environ.get("LC_ALL", "") or environ.get("LANG", ""))
     if not lang:
         return ["en"]
-    languages = [
-        extractor(item) for item in environ.get("LANGUAGE", "").split(":") if item
-    ]
+    languages = [item for item in environ.get("LANGUAGE", "").split(":") if item]
     if lang not in languages:
         languages.append(lang)
     if "en" not in languages:

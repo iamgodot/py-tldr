@@ -37,9 +37,18 @@ def test_parse_command(command, parsed):
     ),
 )
 def test_parse_language(language, config, env_lang, env_language, parsed):
-    environ["LANG"] = env_lang
+    environ["LC_ALL"] = environ["LANG"] = env_lang
     environ["LANGUAGE"] = env_language
     assert parse_language(language, config) == parsed
+
+
+def test_lang_env_precedence():
+    environ.pop("LANGUAGE")
+    environ["LC_ALL"] = "zh_CN.GB2312"
+    environ["LANG"] = "en_US.UTF-8"
+    assert parse_language("", {}) == ["zh", "en"]
+    environ.pop("LC_ALL")
+    assert parse_language("", {}) == ["en"]
 
 
 @pytest.mark.parametrize(
