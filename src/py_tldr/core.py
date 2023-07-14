@@ -31,6 +31,7 @@ DEFAULT_CACHE_HOURS = 24
 DEFAULT_CONFIG = {
     "page_source": "https://raw.githubusercontent.com/tldr-pages/tldr/main/pages",
     "language": "",
+    "platform": "",
     "cache": {
         "enabled": True,
         "timeout": DEFAULT_CACHE_HOURS,
@@ -153,7 +154,7 @@ def cli(ctx, command, platform, language, update):
 
     command = parse_command(command)
     languages = parse_language(language, config)
-    platform = parse_platform(platform)
+    platform = parse_platform(platform, config)
     content = None
     with yaspin(Spinners.arc, text="Searching pages...") as sp:
         try:

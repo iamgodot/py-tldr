@@ -53,12 +53,14 @@ def test_lang_env_precedence():
 
 
 @pytest.mark.parametrize(
-    "platform, parsed",
+    "platform, config,parsed",
     (
-        ["OSX", "osx"],
-        ["macos", "osx"],
-        ["macOS", "osx"],
+        ["OSX", {}, "osx"],
+        ["macos", {}, "osx"],
+        ["macOS", {}, "osx"],
+        ["", {"platform": "osx"}, "osx"],
+        ["", {"platform": "OSX"}, "osx"],
     ),
 )
-def test_parse_platform(platform, parsed):
-    assert parse_platform(platform) == parsed
+def test_parse_platform(platform, config, parsed):
+    assert parse_platform(platform, config) == parsed
