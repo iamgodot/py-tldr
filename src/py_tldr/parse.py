@@ -17,7 +17,11 @@ def parse_language(language: str, config: Dict) -> List[str]:
     """  # noqa: E501
     language = language or config.get("language", "")
     if language:
-        return [language.lower()]
+        if "_" in language:
+            language, country = language.split("_", maxsplit=1)
+            return ["_".join((language.lower(), country.upper()))]
+        else:
+            return [language.lower()]
 
     def extract(x: str) -> str:
         return x.split("_", maxsplit=1)[0].lower()

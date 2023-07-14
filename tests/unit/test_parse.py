@@ -34,6 +34,7 @@ def test_parse_command(command, parsed):
         ["ZH", {}, "", "", ["zh"]],
         ["", {"language": "ZH"}, "", "", ["zh"]],
         ["", {}, "Cz", "IT:cz:DE", ["it", "cz", "de", "en"]],
+        ["zh_TW", {}, "", "", ["zh_TW"]],
     ),
 )
 def test_parse_language(language, config, env_lang, env_language, parsed):
