@@ -42,6 +42,7 @@ Config file should be located as `~/.config/tldr/config.toml`, you can use `--ed
 ```toml
 page_source = "https://raw.githubusercontent.com/tldr-pages/tldr/main/pages"
 language = "en"
+platform = 'linux'
 proxy_url = ""
 
 [cache]
