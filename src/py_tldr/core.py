@@ -35,7 +35,7 @@ DEFAULT_CONFIG = {
     "cache": {
         "enabled": True,
         "timeout": DEFAULT_CACHE_HOURS,
-        "download_url": "https://tldr-pages.github.io/assets/tldr.zip",
+        "download_url": "https://tldr.sh/assets/tldr.zip",
     },
     "proxy_url": "",
 }
