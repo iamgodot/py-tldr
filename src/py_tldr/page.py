@@ -1,7 +1,8 @@
+import json
 from datetime import datetime
 from http import HTTPStatus
 from pathlib import Path as LibPath
-from typing import List
+from typing import Dict, List, Tuple
 from zipfile import ZipFile
 
 import requests
@@ -77,6 +78,27 @@ class PageCache:
             if item.is_file():
                 item.unlink()
 
+    @property
+    def index_file(self) -> LibPath:
+        return LibPath(self.location_base) / "index.json"
+
+    def check_index(self) -> bool:
+        return self._validate_page_file(self.index_file)
+
+    def update_index(self) -> None:
+        """Download newest index.json and restructure it for better searching."""
+        data = download_data(
+            "https://tldr.sh/assets/index.json", proxies={"https": self.proxy_url}
+        )
+        index, index_compact = json.loads(data), {}
+        for command in index["commands"]:
+            index_compact[command["name"]] = {
+                "platforms": command["platform"],
+                "languages": command["language"],
+            }
+        with open(self.index_file, "w") as f:
+            json.dump(index_compact, f)
+
 
 class DownloadError(Exception):
     def __init__(self, *args, status_code: int = 0, **kwargs):
@@ -140,36 +162,49 @@ class PageFinder:
         return data.decode(encoding="utf8")
 
     def find(self, name: str, platform: str = "", languages: List[str] = None) -> str:
-        """Find named page based on given platform and language list.
+        """Find page content via local cache and source."""
+        if not self.cache.check_index():
+            self.cache.update_index()
+        name, platform, language = self.search(name, platform, languages)
+        if not name or not platform or not language:
+            return ""
+        if self.cache_enabled:
+            content = self.cache.get(name, platform, language=language)
+            if content:
+                return content
+        content = self._query(self._make_page_url(name, platform, language)) or ""
+        if content and self.cache_enabled:
+            self.cache.set(name, platform, content, language=language)
+        return content
 
-        Tldr merges shared entries under `common` folder, so it's added
-        as a fallback for platform.
-        For each combination of platform and language, following steps
-        will be applied to perform matching:
+    def get_index(self) -> Dict:
+        with open(self.cache.index_file) as f:
+            return json.load(f)
 
-            1. Query cache if enabled, return if result found.
-            2. Query source.
-            3. If matched, set cache if enabled, and simply return.
-            4. Otherwise try next combination.
-        """
-        platform = platform or "common"
-        platforms = [platform, "common"] if platform != "common" else [platform]
-        languages = languages or ["en"]
-        for pf in platforms:
-            for lang in languages:
-                if self.cache_enabled:
-                    content = self.cache.get(name, pf, language=lang)
-                    if content:
-                        return content
-                content = self._query(self._make_page_url(name, pf, lang))
-                if content:
-                    if self.cache_enabled:
-                        self.cache.set(name, pf, content, language=lang)
-                    return content
-        return ""
+    def search(
+        self, name: str, platform: str = "", languages: List[str] = None
+    ) -> Tuple[str, str, str]:
+        """Search index for the best platform and language for the command."""
+        index = self.get_index()
+        info = index.get(name)
+        if not info:
+            return "", "", ""
+
+        platforms = info["platforms"]
+        if platform not in platforms:
+            platform = "common" if "common" in platforms else platforms[0]
+
+        language = ""
+        languages_info = info["languages"]
+        for lang in languages:
+            if lang in languages_info:
+                language = lang
+                break
+        return name, platform, language
 
     def sync(self) -> None:
         self.cache.update()
+        self.cache.update_index()
 
 
 class Formatter:
