@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from http import HTTPStatus
+from logging import getLogger
 from pathlib import Path as LibPath
 from typing import Dict, List, Tuple
 from zipfile import ZipFile
@@ -9,6 +10,8 @@ import requests
 from click import style
 from requests.exceptions import ConnectionError as ConnectionError_
 from requests.exceptions import HTTPError, Timeout
+
+LOGGER = getLogger(__name__)
 
 
 class PageCache:
@@ -154,6 +157,7 @@ class PageFinder:
 
     def _query(self, url: str) -> str:
         try:
+            LOGGER.debug("Query URL: %s", url)
             data = download_data(url, proxies={"https": self.proxy_url})
         except DownloadError as exc:
             if exc.status_code == HTTPStatus.NOT_FOUND:
@@ -165,12 +169,15 @@ class PageFinder:
         """Find page content via local cache and source."""
         if not self.cache.check_index():
             self.cache.update_index()
+        LOGGER.debug("Page find for: %s, %s, %s", name, platform, languages)
         name, platform, language = self.search(name, platform, languages)
         if not name or not platform or not language:
             return ""
+        LOGGER.debug("Search result: %s, %s, %s", name, platform, language)
         if self.cache_enabled:
             content = self.cache.get(name, platform, language=language)
             if content:
+                LOGGER.debug("Cache enabled and hit!")
                 return content
         content = self._query(self._make_page_url(name, platform, language)) or ""
         if content and self.cache_enabled:
