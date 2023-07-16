@@ -139,10 +139,11 @@ def cli(ctx, command, platform, language, update):
     config = setup_config()
     page_finder = make_page_finder(config)
 
+    languages = parse_language(language, config)
     if update:
         with yaspin(Spinners.arc, text="Downloading pages...") as sp:
             try:
-                page_finder.sync()
+                page_finder.sync(languages[0])
             except DownloadError:
                 sp.write("> Sync failed, check your network and try again.")
                 sys.exit(1)
@@ -155,7 +156,6 @@ def cli(ctx, command, platform, language, update):
         return
 
     command = parse_command(command)
-    languages = parse_language(language, config)
     platform = parse_platform(platform, config)
     content = None
     with yaspin(Spinners.arc, text="Searching pages...") as sp:

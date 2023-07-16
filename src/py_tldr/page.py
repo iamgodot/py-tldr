@@ -3,6 +3,7 @@ from datetime import datetime
 from http import HTTPStatus
 from logging import getLogger
 from pathlib import Path as LibPath
+from shutil import rmtree
 from typing import Dict, List, Tuple
 from zipfile import ZipFile
 
@@ -65,8 +66,9 @@ class PageCache:
         with open(page_file, "w", encoding="utf8") as f:
             f.write(content)
 
-    def update(self):
-        """Download all latest pages."""
+    def update(self, language: str):
+        """Download pages for specified language."""
+        LOGGER.debug("Update cache for language: %s", language)
         data = download_data(self.download_url, proxies={"https": self.proxy_url})
         tldr_zip = self.location_base / "tldr.zip"
         with open(tldr_zip, "wb") as f:
@@ -76,10 +78,14 @@ class PageCache:
             f.extractall(self.location_base)
 
         # Remove non-page files, such as tldr.zip, index.json and LICENSE.md
+        # Also remove page dirs of other languages
         tldr_zip.unlink()
+        dir_to_reserve = "pages" if language == "en" else f"pages.{language}"
         for item in self.location_base.iterdir():
             if item.is_file():
                 item.unlink()
+            elif item.name != dir_to_reserve:
+                rmtree(item)
 
     @property
     def index_file(self) -> LibPath:
@@ -209,8 +215,8 @@ class PageFinder:
                 break
         return name, platform, language
 
-    def sync(self) -> None:
-        self.cache.update()
+    def sync(self, language: str) -> None:
+        self.cache.update(language)
         self.cache.update_index()
 
 
