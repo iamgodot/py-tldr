@@ -5,13 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2023-07-15
+### Added
+- Support for language and platform in config file.
+- Accept `macos` as an alias of `osx`.
+- Read `LC_ALL` env for language parsing.
+### Changed
+- Utilize index file for page searching.
+- Only keep cached pages for user's language.
+
 ## [0.7.0] - 2023-03-10
 ### Added
 - `--edit-config` option.
 
 ## [0.6.5] - 2023-03-01
 ### Removed
-- `--config` option. 
+- `--config` option.
 
 ## [0.6.4] - 2023-02-06
 ### Changed

@@ -48,7 +48,7 @@ proxy_url = ""
 [cache]
 enabled = true
 timeout = 24
-download_url = "https://tldr-pages.github.io/assets/tldr.zip"
+download_url = "https://tldr.sh/assets/tldr.zip"
 ```
 
 Cache is enabled implicitly, with 24 hours as expiration time by default.
@@ -71,4 +71,4 @@ See [CHANGELOG](docs/CHANGELOG.md)
 
 ## Credits
 
-This package was created with [cookiecutter](https://github.com/audreyr/cookiecutter) and [iamgodot/gen-pyckage](https://github.com/iamgodot/gen-pyckage) project template.
+This package was created with [cookiecutter](https://github.com/audreyr/cookiecutter) and [iamgodot/create-python-app](https://github.com/iamgodot/create-python-app) project template.
