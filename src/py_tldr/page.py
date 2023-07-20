@@ -61,8 +61,8 @@ class PageCache:
         return res
 
     def set(self, name: str, platform: str, content: str, language: str = "en"):
-        (self.location / platform).mkdir(parents=True, exist_ok=True)
         page_file = self._make_page_file(platform, name, language)
+        page_file.parent.mkdir(parents=True, exist_ok=True)
         with open(page_file, "w", encoding="utf8") as f:
             f.write(content)
 
