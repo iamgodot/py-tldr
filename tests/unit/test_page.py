@@ -24,14 +24,19 @@ class TestPageCache:
             return_value=json.dumps(
                 {
                     "commands": [
-                        {"name": "tldr", "platform": ["linux"], "language": ["en"]}
+                        {
+                            "name": "tldr",
+                            "platform": ["linux"],
+                            "language": ["en"],
+                            "targets": [{"os": "linux", "language": "en"}],
+                        }
                     ]
                 }
             ),
         )
         cache.update_index()
         with open(cache.index_file) as f:
-            assert json.load(f)["tldr"] == {"platforms": ["linux"], "languages": ["en"]}
+            assert json.load(f)["tldr"] == {"linux": ["en"]}
         assert cache.check_index() is True
 
 
@@ -109,34 +114,50 @@ class TestPageFinder:
                 ("", "", ""),
             ),
             (
-                {"tldr": {"platforms": ["common", "linux"], "languages": ["en"]}},
+                {"tldr": {"linux": ["en"], "common": ["en"]}},
                 ("tldr", "linux", ["en"]),
                 ("tldr", "linux", "en"),
             ),
             (
-                {"tldr": {"platforms": ["common", "linux"], "languages": ["en"]}},
+                {"tldr": {"linux": ["en"], "common": ["en"]}},
                 ("tldr", "osx", ["en"]),
                 ("tldr", "common", "en"),
             ),
             (
-                {"tldr": {"platforms": ["linux"], "languages": ["en"]}},
+                {
+                    "tldr": {
+                        "linux": ["en"],
+                    }
+                },
                 ("tldr", "osx", ["en"]),
                 ("tldr", "linux", "en"),
             ),
             (
-                {"tldr": {"platforms": ["linux"], "languages": ["en"]}},
+                {
+                    "tldr": {
+                        "linux": ["en"],
+                    }
+                },
                 ("tldr", "linux", ["en"]),
                 ("tldr", "linux", "en"),
             ),
             (
-                {"tldr": {"platforms": ["linux"], "languages": ["en"]}},
+                {
+                    "tldr": {
+                        "linux": ["en"],
+                    }
+                },
                 ("tldr", "linux", ["zh", "en"]),
                 ("tldr", "linux", "en"),
             ),
             (
-                {"tldr": {"platforms": ["linux"], "languages": ["en"]}},
+                {
+                    "tldr": {
+                        "linux": ["en"],
+                    }
+                },
                 ("tldr", "linux", ["zh"]),
-                ("tldr", "linux", ""),
+                ("tldr", "", ""),
             ),
         ),
     )
