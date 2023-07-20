@@ -11,8 +11,8 @@ from click import command as command_
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
-from .page import DownloadError, PageFinder, PageFormatter
-from .parse import parse_command, parse_language, parse_platform
+from py_tldr.page import DownloadError, PageFinder, PageFormatter
+from py_tldr.parse import parse_command, parse_language, parse_platform
 
 try:
     from importlib.metadata import version

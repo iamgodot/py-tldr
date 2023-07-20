@@ -4,7 +4,7 @@ from os import environ
 from .core import cli
 from .page import PageCache, PageFinder, PageFormatter
 
-__version__ = "0.8.0"
+__version__ = "0.8.1"
 
 
 logging_config = {

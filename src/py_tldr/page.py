@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 from datetime import datetime
 from http import HTTPStatus
 from logging import getLogger
@@ -61,8 +62,8 @@ class PageCache:
         return res
 
     def set(self, name: str, platform: str, content: str, language: str = "en"):
-        (self.location / platform).mkdir(parents=True, exist_ok=True)
         page_file = self._make_page_file(platform, name, language)
+        page_file.parent.mkdir(parents=True, exist_ok=True)
         with open(page_file, "w", encoding="utf8") as f:
             f.write(content)
 
@@ -101,10 +102,10 @@ class PageCache:
         )
         index, index_compact = json.loads(data), {}
         for command in index["commands"]:
-            index_compact[command["name"]] = {
-                "platforms": command["platform"],
-                "languages": command["language"],
-            }
+            name = command["name"]
+            index_compact[name] = defaultdict(list)
+            for target in command["targets"]:
+                index_compact[name][target["os"]].append(target["language"])
         with open(self.index_file, "w") as f:
             json.dump(index_compact, f)
 
@@ -198,22 +199,24 @@ class PageFinder:
         self, name: str, platform: str = "", languages: List[str] = None
     ) -> Tuple[str, str, str]:
         """Search index for the best platform and language for the command."""
-        index = self.get_index()
-        info = index.get(name)
+        info = self.get_index().get(name)
         if not info:
             return "", "", ""
 
-        platforms = info["platforms"]
-        if platform not in platforms:
-            platform = "common" if "common" in platforms else platforms[0]
-
-        language = ""
-        languages_info = info["languages"]
-        for lang in languages:
-            if lang in languages_info:
-                language = lang
+        platforms = list(info.keys())
+        for pf in [platform, "common"]:
+            if pf in platforms:
+                platforms.remove(pf)
+        res_platform, res_language = "", ""
+        for pf in [platform, "common"] + platforms:
+            if pf in info:
+                for lang in languages:
+                    if lang in info[pf]:
+                        res_platform, res_language = pf, lang
+                        break
+            if res_platform and res_language:
                 break
-        return name, platform, language
+        return name, res_platform, res_language
 
     def sync(self, language: str) -> None:
         self.cache.update(language)
