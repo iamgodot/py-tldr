@@ -38,6 +38,8 @@ def parse_language(language: str, config: Dict) -> List[str]:
 
 
 def parse_platform(platform: str, config: Dict) -> str:
+    if platform.lower() not in ["android", "linux", "osx", "macos", "sunos", "windows"]:
+        platform = ""
     platform = platform or config.get("platform", "")
     if platform:
         platform = platform.lower()
