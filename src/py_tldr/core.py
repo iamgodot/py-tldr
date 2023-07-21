@@ -6,7 +6,7 @@ from os import environ
 from pathlib import Path as LibPath
 
 import toml
-from click import Choice, argument, option, pass_context, secho
+from click import argument, option, pass_context, secho
 from click import command as command_
 from yaspin import yaspin
 from yaspin.spinners import Spinners
@@ -116,13 +116,14 @@ def setup_config():  # pylint: disable=unused-argument
 @option(
     "-p",
     "--platform",
-    type=Choice(["android", "linux", "macos", "osx", "sunos", "windows"]),
-    default="linux",
-    help="Specify searching platform(macos as an alias of osx).",
+    type=str,
+    default="",
+    help="Possible values: android, linux, osx(macos), sunos, windows.",
 )
 @option(
     "-L",
     "--language",
+    type=str,
     default="en",
     help="Specify searching language(with no fallbacks), e.g. `en`.",
 )
