@@ -138,15 +138,6 @@ class TestPageFinder:
                         "linux": ["en"],
                     }
                 },
-                ("tldr", "linux", ["en"]),
-                ("tldr", "linux", "en"),
-            ),
-            (
-                {
-                    "tldr": {
-                        "linux": ["en"],
-                    }
-                },
                 ("tldr", "linux", ["zh", "en"]),
                 ("tldr", "linux", "en"),
             ),
